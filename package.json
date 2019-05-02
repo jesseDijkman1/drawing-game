@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/jesseDijkman1/drawing-game#readme",
   "dependencies": {
+    "cookie": "^0.3.1",
+    "cookie-parser": "^1.4.4",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "express-session": "^1.16.1",

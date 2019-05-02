@@ -7,6 +7,17 @@
 <body>
   <h1><%= pageTitle %></h1>
 
+  <% rooms.forEach(room => { %>
+    <article class="room">
+      <ul class="room-data">
+        <li class="room-id"><%= room.id %></li>
+        <li class="room-difficulty"><%= room.difficulty %></li>
+        <li class="room-players"><span class="current"><%= room.players%></span><span class="max"><%= room.maxPlayers %></span></li>
+      </ul>
+      <a class="overlay" href="room/<%= room.id %>"></a>
+    </article>
+  <% }) %>
+
   <%- include partials/scripts %>
 </body>
 </html>
