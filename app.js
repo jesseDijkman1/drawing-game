@@ -73,25 +73,31 @@ app.get("/room/:id", (req, res) => {
 })
 
 
-
-
-
 ///////////////
 //  Sockets  //
 ///////////////
 
-io.on("connection", async (socket) => {
-  console.log("NEW CONNECTION")
+io.on("connection", async socket => {
   const session = await cookieSession(socket)
-
   checkSession(session, socket.id)
+
+  const urlPath = await urlPathFinder(socket.handshake.headers.host, socket.handshake.headers.referer)
+
+  if (urlPath) {
+    socket.join(urlPath)
+
+    io.sockets.in(urlPath).emit("player joined", {sessionId: session, playerData: activeSessions[session]})
+  }
+
+
 
   socket.on("disconnect", () => {
     console.log(`${socket.id} disconnected`)
     checkSession(session, null)
-
   })
 })
+
+
 
 function checkSession(session, socketID) {
   if (session in activeSessions) {
@@ -116,6 +122,19 @@ function updateSessions(req) {
       delete activeSessions[s]
     }
   }
+}
+
+function urlPathFinder(host, referer) {
+  return new Promise((resolve, reject) => {
+    const rx = new RegExp(`(?<=.+?${host}).+`)
+    const urlParts = rx.exec(referer)[0].split("/").filter(itm => itm.length)
+
+    if (!urlParts.length) {
+      resolve(undefined)
+    } else {
+      resolve(urlParts.join("_"))
+    }
+  })
 }
 
 function cookieSession(socket) {

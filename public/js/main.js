@@ -2,4 +2,10 @@
 
 const socket = io();
 
-console.log("UH")
+console.log("in lobby")
+
+socket.on("player joined", data => {
+  console.log("CUNT JOINED", data.sessionId)
+})
+
+socket.on("tst", () => console.log("TESTING"))
