@@ -17,21 +17,21 @@ const express = require("express"),
 /////////////////
 
 const port = 5000;
+
+const activeSessions = {};
+
 const rooms = [
   {
-    id: 1,
     difficulty: "easy",
     maxPlayers: 10,
     players: 0
   },
   {
-    id: 2,
     difficulty: "medium",
     maxPlayers: 10,
     players: 0
   },
   {
-    id: 3,
     difficulty: "hard",
     maxPlayers: 10,
     players: 0
@@ -62,18 +62,26 @@ app.use(session({
 app.get("/", (req, res) => {
   res.render("lobby.ejs", {rooms: rooms})
 
-  updateSessions(req)
+
+  updateSessions(req) // Probably useless
 })
 
-const activeSessions = {};
+app.get("/room/:id", (req, res) => {
+  const roomIndex = parseInt(req.params.id);
+
+  res.render("room.ejs", {roomData: rooms[roomIndex], roomId: roomIndex})
+})
+
+
+
+
 
 ///////////////
 //  Sockets  //
 ///////////////
 
-
-
 io.on("connection", async (socket) => {
+  console.log("NEW CONNECTION")
   const session = await cookieSession(socket)
 
   checkSession(session, socket.id)
@@ -96,8 +104,6 @@ function checkSession(session, socketID) {
 
     console.log("NEW", activeSessions)
   }
-
-
 }
 
 function updateSessions(req) {
