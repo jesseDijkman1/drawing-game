@@ -7,12 +7,17 @@
 <%- include partials/head %>
 
 <body>
-  <h1><%= pageTitle %></h1>
-  <main>
+  <main id="room-content">
+    <header>Room <%= roomId %></header>
     <canvas></canvas>
-    <aside id="room-chat">
+    <aside>
       <ul class="chat-messages">
       </ul>
+      <footer>
+        <input type="text">
+        <button type="button">Submit</button>
+      </footer>
+
     </aside>
   </main>
 

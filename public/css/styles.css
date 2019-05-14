@@ -1,3 +1,80 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui;
+}
+
+li {
+  list-style-type: none;
+}
+
+button, input {
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+#room-content {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: 5rem calc(100vh - 5rem);
+  height: 100vh;
+  width: 100vw;
+}
+
+#room-content header {
+  grid-column: 1 / 3;
+  background: #e7e7e7;
+}
+
+#room-content canvas {
+  border: solid 1px black;
+  width: 100%;
+  height: 100%;
+}
+
+#room-content aside {
+  display: flex;
+  flex-direction: column;
+  border: solid 1px black;
+}
+
+#room-content aside ul {
+  height: 100%;
+}
+
+#room-content aside footer {
+  height: 3rem;
+  display: flex;
+  background: #4de2a7;
+  border: solid 3px #4de2a7;
+}
+#room-content aside footer input {
+  width: 100%;
+  background: rgba(0,0,0,.1);
+  border-radius: 3px;
+  padding: 0 .5em;
+  color: #45494f;
+  box-shadow: inset 0px 2px 5px 0px rgba(0,0,0,0.13);
+
+}
+#room-content aside footer button {
+  padding: 0 .5em;
+  background: rgba(255,255,255,.3);
+  font-weight: bold;
+  color: #45494f;
+  letter-spacing: 1px;
+  border-radius: 3px;
+}
+
+#room-content aside footer button:hover {
+  cursor: pointer;
+  background: rgba(255,255,255,.6);
+}
 
 .room {
   border: solid 1px black;
