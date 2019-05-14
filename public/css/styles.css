@@ -45,6 +45,8 @@ button, input {
 
 #room-content aside ul {
   height: 100%;
+  background: #303030;
+
 }
 
 #room-content aside footer {
@@ -53,22 +55,24 @@ button, input {
   background: #4de2a7;
   border: solid 3px #4de2a7;
 }
-#room-content aside footer input {
-  width: 100%;
-  background: rgba(0,0,0,.1);
-  border-radius: 3px;
-  padding: 0 .5em;
-  color: #45494f;
-  box-shadow: inset 0px 2px 5px 0px rgba(0,0,0,0.13);
 
-}
+#room-content aside footer input,
 #room-content aside footer button {
   padding: 0 .5em;
-  background: rgba(255,255,255,.3);
-  font-weight: bold;
   color: #45494f;
   letter-spacing: 1px;
   border-radius: 3px;
+}
+
+#room-content aside footer input {
+  width: 100%;
+  background: rgba(0,0,0,.1);
+  box-shadow: inset 0px 2px 5px 0px rgba(0,0,0,0.13);
+}
+
+#room-content aside footer button {
+  background: rgba(255,255,255,.3);
+  font-weight: bold;
 }
 
 #room-content aside footer button:hover {
