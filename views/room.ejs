@@ -8,8 +8,16 @@
 
 <body>
   <h1><%= pageTitle %></h1>
+  <main>
+    <canvas></canvas>
+    <aside id="room-chat">
+      <ul class="chat-messages">
+      </ul>
+    </aside>
+  </main>
 
-  <% const pageCategory = "room" %>
+
   <%- include partials/scripts %>
+
 </body>
 </html>

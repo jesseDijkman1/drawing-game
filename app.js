@@ -24,19 +24,42 @@ const rooms = [
   {
     difficulty: "easy",
     maxPlayers: 10,
-    players: 0
+    players: [],
+    messages: []
   },
   {
     difficulty: "medium",
     maxPlayers: 10,
-    players: 0
+    players: [],
+    messages: []
   },
   {
     difficulty: "hard",
     maxPlayers: 10,
-    players: 0
+    players: [],
+    messages: []
   }
 ]
+
+class Message {
+  constructor(data) {
+    this.sessionID = data.sessionID;
+    this.socketID = data.socketID
+    this.name = data.name;
+    this.class;
+    this.message;
+  }
+
+  lobby() {
+    return new Promise((resolve, reject) => {
+      this.message = `${this.name || this.socketID} joined the room`;
+      this.class = "lobby";
+
+      resolve(this)
+    })
+  }
+}
+
 //////////////////
 //  Middleware  //
 //////////////////
@@ -60,17 +83,20 @@ app.use(session({
 
 
 app.get("/", (req, res) => {
-  res.render("lobby.ejs", {rooms: rooms})
+  // res.render("lobby.ejs", {rooms: rooms})
+  res.redirect("/room/1")
 
 
-  updateSessions(req) // Probably useless
+  // updateSessions(req) // Probably useless
 })
 
 app.get("/room/:id", (req, res) => {
-  const roomIndex = parseInt(req.params.id);
+  const roomIndex = parseInt(req.params.id)
+
 
   res.render("room.ejs", {roomData: rooms[roomIndex], roomId: roomIndex})
 })
+
 
 
 ///////////////
@@ -78,72 +104,7 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-  const session = await cookieSession(socket)
-  checkSession(session, socket.id)
 
-  const urlPath = await urlPathFinder(socket.handshake.headers.host, socket.handshake.headers.referer)
-
-  if (urlPath) {
-    socket.join(urlPath)
-
-    io.sockets.in(urlPath).emit("player joined", {sessionId: session, playerData: activeSessions[session]})
-  }
-
-
-
-  socket.on("disconnect", () => {
-    console.log(`${socket.id} disconnected`)
-    checkSession(session, null)
-  })
 })
-
-
-
-function checkSession(session, socketID) {
-  if (session in activeSessions) {
-    activeSessions[session].socketID = socketID;
-    console.log("UPDATE", activeSessions)
-  } else {
-    activeSessions[session] = {
-      socketID: socketID
-    }
-
-    console.log("NEW", activeSessions)
-  }
-}
-
-function updateSessions(req) {
-  const all = Object.keys(req.sessionStore.sessions);
-
-  console.log(all)
-
-  for (let s in activeSessions) {
-    if (!all.includes(s)) {
-      delete activeSessions[s]
-    }
-  }
-}
-
-function urlPathFinder(host, referer) {
-  return new Promise((resolve, reject) => {
-    const rx = new RegExp(`(?<=.+?${host}).+`)
-    const urlParts = rx.exec(referer)[0].split("/").filter(itm => itm.length)
-
-    if (!urlParts.length) {
-      resolve(undefined)
-    } else {
-      resolve(urlParts.join("_"))
-    }
-  })
-}
-
-function cookieSession(socket) {
-  return new Promise((resolve, reject) => {
-    const rough = cookie.parse(socket.request.headers.cookie)["connect.sid"],
-          rx = /(?<=s:).+?(?=\.)/;
-
-    resolve(rx.exec(rough)[0])
-  })
-}
 
 server.listen(port, () => console.log(`Listening to port: ${port}`));
