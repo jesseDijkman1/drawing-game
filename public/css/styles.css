@@ -43,7 +43,7 @@ button, input {
   height: 100%;
 }
 
-#room-content aside {
+#room-content .chat-container {
   display: flex;
   flex-direction: column;
   border: solid 1px black;
@@ -92,8 +92,12 @@ button, input {
 
 
 .game-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   height: 100%;
   width: 5rem;
+  padding: 1rem 0
 }
 
 .game-options ul {
@@ -101,7 +105,6 @@ button, input {
   flex-direction: column;
   align-items: center;
   height: 100%;
-  padding: 1rem 0;
 }
 
 .game-options ul li {
@@ -157,4 +160,21 @@ button, input {
   height: 100%;
   top: 0;
   left: 0;
+}
+
+#pen-preview {
+  border-radius: 100%;
+  background: grey;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+  max-width: 50px;
+  max-height: 50px;
+}
+
+#pen-preview div {
+  border-radius: inherit;
 }
