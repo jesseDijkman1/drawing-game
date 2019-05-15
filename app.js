@@ -104,7 +104,7 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-
+  
 })
 
 server.listen(port, () => console.log(`Listening to port: ${port}`));

@@ -1,6 +1,8 @@
 "use strict";
 
-const socket = io();
+import Game from "./modules/game_class.js";
+import PenPreview from "./modules/penPreview_class.js";
+import Drawing from "./modules/drawing_class.js";
 
 const canvas = document.querySelector("canvas");
 const chat = document.querySelector("#room-chat .chat-messages");
@@ -11,8 +13,9 @@ const allSliders = document.querySelectorAll(".option input");
 const penColor = document.querySelector(".pen-option-color");
 const penSize = document.querySelector(".pen-option-size");
 
+const game = new Game(canvas)
 
-(() => {
+void function iife() {
   canvas.setAttribute("width", canvas.offsetWidth)
   canvas.setAttribute("height", canvas.offsetHeight)
 
@@ -21,105 +24,9 @@ const penSize = document.querySelector(".pen-option-size");
   }
 
   canvas.addEventListener("mousedown", startDrawing)
-})()
 
-class Game {
-  constructor(c) {
-    this.ctx = c.getContext("2d");
-    this.drawings;
-  }
-
-  render(drawing) {
-    this.ctx.lineJoin = "round";
-    this.ctx.strokeStyle = drawing.penColor;
-    this.ctx.lineWidth = drawing.penSize;
-
-    drawing.points.forEach((p, i, a) => {
-      this.ctx.beginPath();
-
-      if (i == 0) {
-        this.ctx.moveTo(this.x, this.y)
-      } else {
-        this.ctx.moveTo(a[i - 1].x, a[i - 1].y)
-      }
-
-      this.ctx.lineTo(p.x, p.y)
-      this.ctx.closePath()
-      this.ctx.stroke()
-    })
-  }
-}
-
-const game = new Game(canvas)
-
-
-
-
-class PenSettings {
-  constructor() {}
-
-  get color() {
-    this.color = this.colorInputs
-
-    return this.penColor;
-  }
-
-  set color(inputs) {
-    const data = {}
-
-    for (let i = 0; i < inputs.length; i++) {
-      data[inputs[i].dataset.char] = `${inputs[i].value}${inputs[i].dataset.unit || ""}`
-    }
-
-    this.penColor = `${Object.keys(data).join("")}(${Object.values(data).join(",")})`
-  }
-
-  get size() {
-    this.size = this.sizeInput
-
-    return this.penSize;
-  }
-
-  set size(input) {
-    this.penSize = input.value;
-  }
-}
-
-class PenPreview extends PenSettings{
-  constructor(preview, penColor, penSize) {
-    super()
-
-    this.element = preview;
-    super.color = penColor.querySelectorAll("input");
-    super.size = penSize.querySelector("input");
-
-    this.update()
-  }
-
-  update() {
-    console.log("uh")
-    this.element.style.background = this.penColor
-    this.element.style.width = `${this.penSize}px`
-    this.element.style.height = `${this.penSize}px`
-  }
-}
-
-new PenPreview(penPreview, penColor, penSize)
-
-class Drawing extends PenSettings {
-  constructor(target, penColor, penSize) {
-    super()
-
-    super.color = penColor.querySelectorAll("input");
-    super.size = penSize.querySelector("input");
-
-    this.points = [];
-  }
-
-  addPoint(point) {
-    this.points.push(point)
-  }
-}
+  new PenPreview(penPreview, penColor, penSize)
+}()
 
 function startDrawing(e) {
   const startX = e.clientX,
@@ -137,6 +44,7 @@ function startDrawing(e) {
     })
 
     game.render(drawing)
+    game.broadcast(drawing)
   }
 
   function endDrawing(ev) {
