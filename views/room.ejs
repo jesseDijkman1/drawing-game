@@ -9,8 +9,42 @@
 <body>
   <main id="room-content">
     <header>Room <%= roomId %></header>
-    <canvas></canvas>
-    <aside>
+    <section class="canvas-container">
+      <canvas></canvas>
+      <aside class="game-options">
+        <ul>
+          <li>
+            <label for="pen-size">Size</label>
+            <input id="pen-size" class="option-toggler visuallyhidden" type="checkbox">
+
+            <div class="option pen-option-size">
+              <input type="range" min="1" max="20" value="5">
+            </div>
+          </li>
+          <li>
+            <label for="pen-color">Color</label>
+            <input id="pen-color" class="option-toggler visuallyhidden" type="checkbox">
+
+            <div class="option pen-option-color">
+              <div class="range-container">
+                <label for="hsl-h">H</label>
+                <input id="hsl-h" data-char="h" type="range" min="0" max="360" value="0">
+              </div>
+              <div class="range-container">
+                <label for="hsl-s">S</label>
+                <input id="hsl-s" data-char="s" data-unit="%" type="range" min="0" max="100" value="0">
+              </div>
+              <div class="range-container">
+                <label for="hsl-l">L</label>
+                <input id="hsl-l" data-char="l" data-unit="%" type="range" min="0" max="100" value="0">
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div id="pen-preview"></div>
+      </aside>
+    </section>
+    <aside class="chat-container">
       <ul class="chat-messages">
       </ul>
       <footer>

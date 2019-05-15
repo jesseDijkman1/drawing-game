@@ -18,6 +18,12 @@ button, input {
   font-size: 1rem;
 }
 
+.visuallyhidden {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
 #room-content {
   display: grid;
   grid-template-columns: 3fr 1fr;
@@ -43,10 +49,9 @@ button, input {
   border: solid 1px black;
 }
 
-#room-content aside ul {
+#room-content .chat-container ul {
   height: 100%;
   background: #303030;
-
 }
 
 #room-content aside footer {
@@ -78,6 +83,62 @@ button, input {
 #room-content aside footer button:hover {
   cursor: pointer;
   background: rgba(255,255,255,.6);
+}
+
+.canvas-container {
+  display: flex;
+}
+
+
+
+.game-options {
+  height: 100%;
+  width: 5rem;
+}
+
+.game-options ul {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 1rem 0;
+}
+
+.game-options ul li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 4rem;
+  margin-bottom: 2rem;
+  width: 4rem
+}
+
+.game-options ul li > label {
+  /* display: block; */
+  line-height: 4rem;
+  text-align: center;
+  border-radius: 100%;
+  background: grey;
+}
+
+.option {
+  display: none;
+  position: absolute;
+  right: 110%;
+  top: 50%;
+  padding: 1rem;
+  border: solid 1px red;
+}
+
+.option:last-of-type {
+  bottom: 50%;
+}
+
+.option-toggler:checked + .option {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
 }
 
 .room {
