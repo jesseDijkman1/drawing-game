@@ -20,10 +20,9 @@ class Game {
   }
 
   render(drawing) {
-
-    this.ctx.strokeStyle = drawing.drawingColor;
     this.ctx.lineJoin = "round";
-    // this.ctx.lineWidth = 100;
+    this.ctx.strokeStyle = drawing.drawingColor;
+    this.ctx.lineWidth = drawing.drawingSize;
 
     drawing.points.forEach((p, i, a) => {
       this.ctx.beginPath();
@@ -46,9 +45,7 @@ const game = new Game(canvas)
 class PenSettings {
   constructor(colorsContainer, sizeContainer) {
     this.colorInputs = colorsContainer.querySelectorAll("input");
-    this.sizeContainer = sizeContainer.childElements;
-    this.penColor;
-
+    this.sizeInput = sizeContainer.querySelector("input");
   }
 
   get color() {
@@ -66,6 +63,16 @@ class PenSettings {
 
     this.penColor = `${Object.keys(data).join("")}(${Object.values(data).join(",")})`
   }
+
+  get size() {
+    this.size = this.sizeInput
+
+    return this.penSize;
+  }
+
+  set size(input) {
+    this.penSize = input.value;
+  }
 }
 
 class Drawing extends PenSettings {
@@ -73,6 +80,7 @@ class Drawing extends PenSettings {
     super(penColor, penSize)
 
     this.drawingColor = super.color;
+    this.drawingSize = super.size;
     this.points = [];
   }
 
