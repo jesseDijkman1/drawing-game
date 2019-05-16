@@ -1,9 +1,21 @@
 import socket from "./socketIO.js";
 
 export default class {
-  constructor(c) {
-    this.ctx = c.getContext("2d");
-    this.drawings;
+  constructor() {
+    this.ctx = document.getElementById("main-canvas").getContext("2d");
+    this.drawingsAmt = 0;
+
+    socket.on("drawing - render", drawing => {
+      this.render(drawing)
+    })
+
+    socket.on("player - joined", drawings => {
+      this.drawingsAmt = drawings.length;
+
+      drawings.forEach(drawing => {
+        this.render(drawing)
+      })
+    })
   }
 
   render(drawing) {
@@ -27,6 +39,6 @@ export default class {
   }
 
   broadcast(drawing) {
-    console.log(drawing)
+    socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
   }
 }

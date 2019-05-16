@@ -139,9 +139,10 @@ button, input {
 }
 
 .option-toggler:checked + .option {
-  display: flex;
+  display: block;
+  /* display: flex;
   flex-direction: column;
-  align-self: stretch;
+  align-self: stretch; */
 }
 
 .room {

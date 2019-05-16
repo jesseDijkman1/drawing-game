@@ -18,6 +18,7 @@ const express = require("express"),
 
 const port = 5000;
 
+const drawingsSave = [];
 const activeSessions = {};
 
 const rooms = [
@@ -104,7 +105,14 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-  
+  socket.emit("player - joined", drawingsSave)
+
+  socket.on("drawing - save/broadcast", (drawing, id) => {
+    console.log(id)
+    drawingsSave[id] = drawing;
+
+    socket.broadcast.emit("drawing - render", drawing)
+  })
 })
 
 server.listen(port, () => console.log(`Listening to port: ${port}`));

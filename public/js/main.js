@@ -3,8 +3,9 @@
 import Game from "./modules/game_class.js";
 import PenPreview from "./modules/penPreview_class.js";
 import Drawing from "./modules/drawing_class.js";
+import socket from "./modules/socketIO.js";
 
-const canvas = document.querySelector("canvas");
+const canvas = document.getElementById("main-canvas");
 const chat = document.querySelector("#room-chat .chat-messages");
 
 const penPreview = document.querySelector("#pen-preview div");
@@ -13,7 +14,7 @@ const allSliders = document.querySelectorAll(".option input");
 const penColor = document.querySelector(".pen-option-color");
 const penSize = document.querySelector(".pen-option-size");
 
-const game = new Game(canvas)
+const game = new Game()
 
 void function iife() {
   canvas.setAttribute("width", canvas.offsetWidth)
@@ -48,6 +49,8 @@ function startDrawing(e) {
   }
 
   function endDrawing(ev) {
+    game.drawingsAmt++;
+
     window.removeEventListener("mousemove", isDrawing)
 
     setTimeout(() => {
