@@ -3,6 +3,7 @@
 import Game from "./modules/game_class.js";
 import PenPreview from "./modules/penPreview_class.js";
 import Drawing from "./modules/drawing_class.js";
+import Message from "./modules/chatMessage_class.js"
 import socket from "./modules/socketIO.js";
 
 const canvas = document.getElementById("main-canvas");
@@ -14,7 +15,9 @@ const allSliders = document.querySelectorAll(".option input");
 const penColor = document.querySelector(".pen-option-color");
 const penSize = document.querySelector(".pen-option-size");
 
-const game = new Game()
+const chatForm = document.querySelector("#chat-container form");
+
+const game = new Game(canvas, chat)
 
 void function iife() {
   canvas.setAttribute("width", canvas.offsetWidth)
@@ -26,8 +29,14 @@ void function iife() {
 
   canvas.addEventListener("mousedown", startDrawing)
 
+  chatForm.addEventListener("submit", submitChatMsg)
+
   new PenPreview(penPreview, penColor, penSize)
 }()
+
+///////////////////////
+//  Drawing Section  //
+///////////////////////
 
 function startDrawing(e) {
   const startX = e.clientX,
@@ -44,7 +53,7 @@ function startDrawing(e) {
       y: ev.clientY - ev.target.offsetTop
     })
 
-    game.render(drawing)
+    game.renderDrawings(drawing)
     game.broadcast(drawing)
   }
 
@@ -59,6 +68,10 @@ function startDrawing(e) {
     }, 0)
   }
 }
+
+////////////////////////////
+//  Pen Settings Section  //
+////////////////////////////
 
 function startSliding(e) {
   window.addEventListener("mousemove", isSliding)
@@ -76,4 +89,16 @@ function startSliding(e) {
       window.removeEventListener("mouseup", endSliding)
     }, 0)
   }
+}
+
+////////////////////
+//  Chat Section  //
+////////////////////
+
+function submitChatMsg(e) {
+  e.preventDefault()
+
+  const val = e.target.querySelector("input");
+
+  game.renderMessages(new Message(val))
 }

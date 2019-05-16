@@ -1,24 +1,25 @@
 import socket from "./socketIO.js";
 
 export default class {
-  constructor() {
-    this.ctx = document.getElementById("main-canvas").getContext("2d");
+  constructor(canv, chat) {
+    this.ctx = canv.getContext("2d");
+    this.chat = chat;
     this.drawingsAmt = 0;
 
     socket.on("drawing - render", drawing => {
-      this.render(drawing)
+      this.renderDrawings(drawing)
     })
 
     socket.on("player - joined", drawings => {
       this.drawingsAmt = drawings.length;
 
       drawings.forEach(drawing => {
-        this.render(drawing)
+        this.renderDrawings(drawing)
       })
     })
   }
 
-  render(drawing) {
+  renderDrawings(drawing) {
     this.ctx.lineJoin = "round";
     this.ctx.strokeStyle = drawing.penColor;
     this.ctx.lineWidth = drawing.penSize;
@@ -36,6 +37,10 @@ export default class {
       this.ctx.closePath()
       this.ctx.stroke()
     })
+  }
+
+  renderMessages(message) {
+    console.log(message)
   }
 
   broadcast(drawing) {
