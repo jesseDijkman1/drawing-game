@@ -10,7 +10,9 @@ const canvas = document.getElementById("main-canvas");
 const chat = document.querySelector("#chat-container .chat-messages");
 
 const penPreview = document.querySelector("#pen-preview div");
-const allSliders = document.querySelectorAll(".option input");
+const allSliders = document.querySelectorAll(".option input[type=range]");
+
+const canvasClear = document.getElementById("canvas-clear");
 
 const penColor = document.querySelector(".pen-option-color");
 const penSize = document.querySelector(".pen-option-size");
@@ -30,6 +32,11 @@ void function iife() {
   canvas.addEventListener("mousedown", startDrawing)
 
   chatForm.addEventListener("submit", submitChatMsg)
+
+  canvasClear.addEventListener("click", () => {
+    game.clearCanvas.bind(game)
+    game.broadcastClearCanvas()
+  })
 
   new PenPreview(penPreview, penColor, penSize)
 }()

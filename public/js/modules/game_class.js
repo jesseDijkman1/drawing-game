@@ -3,9 +3,14 @@ import Templater from "./templater.js"
 
 export default class {
   constructor(canv, chat) {
+    this.canvas = canv;
     this.ctx = canv.getContext("2d");
     this.chat = chat;
     this.drawingsAmt = 0;
+
+    socket.on("canvas - clear", () => {
+      this.clearCanvas()
+    })
 
     socket.on("drawing - render", drawing => {
       this.renderDrawing(drawing);
@@ -67,5 +72,13 @@ export default class {
 
   broadcastMessage(message) {
     socket.emit("message - save/broadcast", message)
+  }
+
+  clearCanvas() {
+    this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);  
+  }
+
+  broadcastClearCanvas() {
+    socket.emit("drawing - clear all")
   }
 }

@@ -18,8 +18,9 @@ const express = require("express"),
 
 const port = 5000;
 
-const drawingsMemory = [];
-const messagesMemmory = [];
+let drawingsMemory = [];
+let messagesMemmory = [];
+
 const activeSessions = {};
 
 const rooms = [
@@ -118,6 +119,12 @@ io.on("connection", async socket => {
     messagesMemmory.push(message);
 
     socket.broadcast.emit("message - render", message)
+  })
+
+  socket.on("drawing - clear all", () => {
+    drawingsMemory = [];
+
+    socket.broadcast.emit("canvas - clear")
   })
 })
 
