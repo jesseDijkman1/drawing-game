@@ -6,6 +6,7 @@
 
 body {
   font-family: system-ui;
+
 }
 
 li {
@@ -26,15 +27,22 @@ button, input {
 
 #room-content {
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  grid-template-rows: 5rem calc(100vh - 5rem);
   height: 100vh;
   width: 100vw;
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: 5rem calc(100vh - 5rem);
+
 }
 
-#room-content header {
-  grid-column: 1 / 3;
+#room-content > header {
+  grid-column: 1 / 2;
   background: #e7e7e7;
+}
+
+#room-content .canvas-container {
+  grid-column: 1 / 2;
+  display: flex;
+  position: relative;
 }
 
 #room-content canvas {
@@ -43,55 +51,105 @@ button, input {
   height: 100%;
 }
 
-#chat-container {
-  display: flex;
-  flex-direction: column;
-  border: solid 1px black;
+#game-extras {
+  grid-row: 1 / 3;
+  grid-column: 2 / 3 ;
+  overflow: hidden;
 }
 
-#chat-container ul {
-  height: 100%;
+#game-extras > header {
+  height: 5rem;
+  display: flex;
   background: #303030;
 }
 
-#chat-container form {
+#game-extras > header label:hover {
+  cursor: pointer;
+}
+
+#game-extras > header label {
+  font-size: 1.5rem;
+  width: 100%;
+  text-align: center;
+  line-height: 5rem;
+  background: #4de2a7;
+  opacity: .5;
+  transition: opacity .2s ease;
+}
+
+#game-extras .extras-container {
+  display: flex;
+  height: calc(100% - 5rem);
+  width: 100%;
+  border: solid 1px black;
+  transition: transform .2s ease;
+}
+
+#game-extras .scoreboard-container,
+#game-extras .chat-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+}
+
+#game-extras .chat-container ul {
+  height: 100%;
+  background: #303030;
+  overflow-y: scroll;
+}
+
+#game-extras .chat-container form {
   height: 3rem;
   display: flex;
   background: #4de2a7;
   border: solid 3px #4de2a7;
 }
 
-#chat-container form input,
-#chat-container form button {
+#game-extras .chat-container form input,
+#game-extras .chat-container form button {
   padding: 0 .5em;
   color: #45494f;
   letter-spacing: 1px;
   border-radius: 3px;
 }
 
-#chat-container form input {
+#game-extras .chat-container form input {
   width: 100%;
   background: rgba(0,0,0,.1);
   box-shadow: inset 0px 2px 5px 0px rgba(0,0,0,0.13);
 }
 
-#chat-container form button {
+#game-extras .chat-container form button {
   background: rgba(255,255,255,.3);
   font-weight: bold;
 }
 
-#chat-container form button:hover {
+#game-extras .chat-container form button:hover {
   cursor: pointer;
   background: rgba(255,255,255,.6);
 }
 
-.canvas-container {
-  display: flex;
+#tab-chat:checked ~ .extras-container {
+  transform: translateX(0);
+}
+
+#tab-scoreboard:checked ~ .extras-container {
+  transform: translateX(-100%);
+}
+
+#tab-chat:checked ~ header [for="tab-chat"] {
+  opacity: 1;
+}
+
+#tab-scoreboard:checked ~ header [for="tab-scoreboard"] {
+  opacity: 1;
 }
 
 
 
-.game-options {
+
+
+.canvas-options {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -100,14 +158,14 @@ button, input {
   padding: 1rem 0
 }
 
-.game-options ul {
+.canvas-options ul {
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100%;
 }
 
-.game-options ul li {
+.canvas-options ul li {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -117,7 +175,7 @@ button, input {
   width: 4rem
 }
 
-.game-options ul li > label {
+.canvas-options ul li > label {
   /* display: block; */
   line-height: 4rem;
   text-align: center;
@@ -188,24 +246,30 @@ button, input {
 
 #game-waiter {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
   width: 100%;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
+  background: rgba(255,255,255,.5)
 }
 
-#game-waiter p {
+#game-waiter h1 {
+  transform-origin: top center;
   animation: pop 1s ease;
+  background: #4de2a7;
+  margin-top: .5em;
+  padding: 1em;
+  border-radius: .2em;
 }
 
 @keyframes pop {
   0% {
     transform: scale(1)
   }
-
   50% {
     transform: scale(1.5)
   }

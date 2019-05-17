@@ -11,7 +11,7 @@
     <header>Room <%= roomId %></header>
     <section class="canvas-container">
       <canvas id="main-canvas"></canvas>
-      <aside class="game-options">
+      <aside class="canvas-options">
         <ul>
           <li>
             <label for="pen-size">Size</label>
@@ -50,13 +50,26 @@
         </div>
       </aside>
     </section>
-    <aside id="chat-container">
-      <ul class="chat-messages">
-      </ul>
-      <form>
-        <input type="text">
-        <button type="submit">Submit</button>
-      </form>
+    <aside id="game-extras">
+      <input id="tab-chat" class="visuallyhidden" name="game-extras-tabs" type="radio" checked>
+      <input id="tab-scoreboard" class="visuallyhidden" name="game-extras-tabs" type="radio">
+      <header>
+        <label for="tab-chat">Chat</label>
+        <label for="tab-scoreboard">Scoreboard</label>
+      </header>
+      <div class="extras-container">
+        <section class="chat-container">
+          <ul class="chat-messages">
+          </ul>
+          <form>
+            <input type="text">
+            <button type="submit">Submit</button>
+          </form>
+        </section>
+        <section class="scoreboard-container">
+          awoeijf
+        </section>
+      </div>
     </aside>
   </main>
 

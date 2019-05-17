@@ -2,8 +2,8 @@ import socket from "./socketIO.js";
 import Templater from "./templater.js"
 
 export default class {
-  constructor(main, canv, chat) {
-    this.main = main;
+  constructor(canvContainer, canv, chat) {
+    this.canvContainer = canvContainer;
     this.canvas = canv;
     this.ctx = canv.getContext("2d");
     this.chat = chat;
@@ -61,15 +61,19 @@ export default class {
     if (usersAmt == this.maxPlayers) {
       console.log("start the game")
     } else {
-      const template = `<div id="game-waiter"><p>^Waiting for players ${usersAmt}/${this.maxPlayers}^</p></div>`;
+      const template = `
+      <div id="game-waiter">
+        <p>^Waiting for players^</p>
+        <h1>^${usersAmt}/${this.maxPlayers}^</h1>
+      </div>`;
 
       const el = await new Templater(template).parse();
-      const waiter = this.main.querySelector("#game-waiter");
+      const waiter = this.canvContainer.querySelector("#game-waiter");
 
       if (waiter) {
-        this.main.replaceChild(el, waiter)
+        this.canvContainer.replaceChild(el, waiter)
       } else {
-        this.main.appendChild(el)
+        this.canvContainer.appendChild(el)
       }
     }
   }

@@ -6,9 +6,9 @@ import Drawing from "./modules/drawing_class.js";
 import Message from "./modules/chatMessage_class.js"
 import socket from "./modules/socketIO.js";
 
-const main = document.getElementById("room-content");
+const canvContainer = document.querySelector("#room-content .canvas-container");
 const canvas = document.getElementById("main-canvas");
-const chat = document.querySelector("#chat-container .chat-messages");
+const chat = document.querySelector("#game-extras .chat-container .chat-messages");
 
 const penPreview = document.querySelector("#pen-preview div");
 const allSliders = document.querySelectorAll(".option input[type=range]");
@@ -18,9 +18,9 @@ const canvasClear = document.getElementById("canvas-clear");
 const penColor = document.querySelector(".pen-option-color");
 const penSize = document.querySelector(".pen-option-size");
 
-const chatForm = document.querySelector("#chat-container form");
+const chatForm = document.querySelector("#game-extras .chat-container form");
 
-const game = new Game(main, canvas, chat)
+const game = new Game(canvContainer, canvas, chat)
 
 void function iife() {
   canvas.setAttribute("width", canvas.offsetWidth)
