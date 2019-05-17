@@ -18,7 +18,8 @@ const express = require("express"),
 
 const port = 5000;
 
-const drawingsSave = [];
+const drawingsMemory = [];
+const messagesMemmory = [];
 const activeSessions = {};
 
 const rooms = [
@@ -105,13 +106,18 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-  socket.emit("player - joined", drawingsSave)
+  socket.emit("player - joined", {drawings: drawingsMemory, messages: messagesMemmory})
 
   socket.on("drawing - save/broadcast", (drawing, id) => {
-    console.log(id)
-    drawingsSave[id] = drawing;
+    drawingsMemory[id] = drawing;
 
     socket.broadcast.emit("drawing - render", drawing)
+  })
+
+  socket.on("message - save/broadcast", message => {
+    messagesMemmory.push(message);
+
+    socket.broadcast.emit("message - render", message)
   })
 })
 

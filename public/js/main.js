@@ -53,8 +53,8 @@ function startDrawing(e) {
       y: ev.clientY - ev.target.offsetTop
     })
 
-    game.renderDrawings(drawing)
-    game.broadcast(drawing)
+    game.renderDrawing(drawing)
+    game.broadcastDrawing(drawing)
   }
 
   function endDrawing(ev) {
@@ -98,7 +98,12 @@ function startSliding(e) {
 function submitChatMsg(e) {
   e.preventDefault()
 
-  const val = e.target.querySelector("input").value;
+  const input = e.target.querySelector("input");
+  const msg = new Message(input.value);
 
-  game.renderMessage(new Message(val))
+  game.renderMessage(msg);
+  game.broadcastMessage(msg);
+
+  // Reset the input
+  input.value = ""
 }

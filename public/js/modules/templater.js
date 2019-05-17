@@ -6,40 +6,28 @@ export default class {
 
   parse() {
     return new Promise((resolve, reject) => {
+      const rx = /(?:\<(\/)?(\w+)\>|\^(.+)\^)/g,
+            memory = [];
+      let results;
 
+      while (results = rx.exec(this.template)) {
+        const closing = results[1],
+              tagName = results[2],
+              text = results[3];
 
-    const rx = /(?:\<(\/)?(\w+)\>|\^([\§\±\$\_\w]+)\^)/g;
-
-    let results;
-
-    const save = [];
-
-    while (results = rx.exec(this.template)) {
-      const closing = results[1];
-      const tagName = results[2];
-      const dataKey = results[3];
-
-      if (!closing && tagName) {
-        save.push(document.createElement(tagName))
-      } else if (closing && tagName) {
-        console.log("closing tag", tagName)
-
-        if (save.length > 1) {
-          const done = save.pop()
-          save[save.length - 1].appendChild(done)
-        } else {
-          resolve(save.pop())
+        if (!closing && tagName) {
+          memory.push(document.createElement(tagName))
+        } else if (closing && tagName) {
+          if (memory.length > 1) {
+            const done = memory.pop()
+            memory[memory.length - 1].appendChild(done)
+          } else {
+            resolve(memory.pop())
+          }
+        } else if (text) {
+          memory[memory.length - 1].appendChild(document.createTextNode(text))
         }
-
-
-
-      } else if (dataKey) {
-        save[save.length - 1].appendChild(document.createTextNode(this.data[dataKey]))
-
-
-        console.log("data key", dataKey)
       }
-    }
     })
   }
 }

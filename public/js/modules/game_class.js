@@ -8,19 +8,27 @@ export default class {
     this.drawingsAmt = 0;
 
     socket.on("drawing - render", drawing => {
-      this.renderDrawings(drawing)
+      this.renderDrawing(drawing);
     })
 
-    socket.on("player - joined", drawings => {
-      this.drawingsAmt = drawings.length;
+    socket.on("message - render", message => {
+      this.renderMessage(message);
+    })
 
-      drawings.forEach(drawing => {
-        this.renderDrawings(drawing)
+    socket.on("player - joined", data => {
+      this.drawingsAmt = data.drawings.length;
+
+      data.drawings.forEach(drawing => {
+        this.renderDrawing(drawing);
+      })
+
+      data.messages.forEach(message => {
+        this.renderMessage(message);
       })
     })
   }
 
-  renderDrawings(drawing) {
+  renderDrawing(drawing) {
     this.ctx.lineJoin = "round";
     this.ctx.strokeStyle = drawing.penColor;
     this.ctx.lineWidth = drawing.penSize;
@@ -43,20 +51,21 @@ export default class {
   async renderMessage(message) {
     const template = `
     <${this.chat.nodeName == "UL" ? "li" : "div"}>
-      <header>^userId^</header>
-      <p>^value^</p>
-      <footer>^time^</footer>
+      <header>^${message.userId}^</header>
+      <p>^${message.value}^</p>
+      <footer>^${message.time}^</footer>
     </${this.chat.nodeName == "UL" ? "li" : "div"}>`;
 
     const msgEl = await new Templater(template, message).parse();
 
     this.chat.appendChild(msgEl)
-
-
-
   }
 
-  broadcast(drawing) {
+  broadcastDrawing(drawing) {
     socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
+  }
+
+  broadcastMessage(message) {
+    socket.emit("message - save/broadcast", message)
   }
 }
