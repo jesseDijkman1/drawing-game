@@ -1,22 +1,31 @@
 export default class {
-  constructor(template, data) {
+  constructor(template) {
     this.template = template;
-    this.data = data;
   }
 
   parse() {
     return new Promise((resolve, reject) => {
-      const rx = /(?:\<(\/)?(\w+)\>|\^(.+)\^)/g,
+      // const rx = /(?:\<(\/)?(\w+)\>|\^(.+)\^)/g,
+      const rx = /(?:\<(\/)?(\w+)(?:\s(.+?))?\>|\^(.+)\^)/g,
             memory = [];
       let results;
 
       while (results = rx.exec(this.template)) {
         const closing = results[1],
               tagName = results[2],
-              text = results[3];
+              attributes = results[3],
+              text = results[4]
 
         if (!closing && tagName) {
           memory.push(document.createElement(tagName))
+          if (attributes) {
+            const attrRx = /([\w-]+)="(.+?)"/g;
+            let attrResults;
+
+            while (attrResults = attrRx.exec(attributes)) {
+              memory[memory.length - 1].setAttribute(attrResults[1], attrResults[2])
+            }
+          }
         } else if (closing && tagName) {
           if (memory.length > 1) {
             const done = memory.pop()

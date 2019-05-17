@@ -185,3 +185,31 @@ button, input {
   background: green;
   display: flex;
 }
+
+#game-waiter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+#game-waiter p {
+  animation: pop 1s ease;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1)
+  }
+
+  50% {
+    transform: scale(1.5)
+  }
+  100% {
+    transform: scale(1)
+  }
+}

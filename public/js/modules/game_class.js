@@ -2,11 +2,14 @@ import socket from "./socketIO.js";
 import Templater from "./templater.js"
 
 export default class {
-  constructor(canv, chat) {
+  constructor(main, canv, chat) {
+    this.main = main;
     this.canvas = canv;
     this.ctx = canv.getContext("2d");
     this.chat = chat;
     this.drawingsAmt = 0;
+    this.maxPlayers = 5;
+    this.players = {};
 
     socket.on("canvas - clear", () => {
       this.clearCanvas()
@@ -20,8 +23,9 @@ export default class {
       this.renderMessage(message);
     })
 
-    socket.on("player - joined", data => {
+    socket.on("player - joined/update", data => {
       this.drawingsAmt = data.drawings.length;
+      this.players = data.users
 
       data.drawings.forEach(drawing => {
         this.renderDrawing(drawing);
@@ -30,7 +34,44 @@ export default class {
       data.messages.forEach(message => {
         this.renderMessage(message);
       })
+
+      this.updateUsers()
     })
+
+    socket.on("player - joined", userId => {
+      this.updateUsers(userId, true)
+    })
+
+    socket.on("player - left", userId => {
+      this.updateUsers(userId, false)
+    })
+  }
+
+  async updateUsers(userId = undefined, joined = undefined) {
+    if (userId) {
+      if (joined) {
+        this.players[userId] = {};
+      } else {
+        delete this.players[userId]
+      }
+    }
+
+    const usersAmt = Object.keys(this.players).length;
+
+    if (usersAmt == this.maxPlayers) {
+      console.log("start the game")
+    } else {
+      const template = `<div id="game-waiter"><p>^Waiting for players ${usersAmt}/${this.maxPlayers}^</p></div>`;
+
+      const el = await new Templater(template).parse();
+      const waiter = this.main.querySelector("#game-waiter");
+
+      if (waiter) {
+        this.main.replaceChild(el, waiter)
+      } else {
+        this.main.appendChild(el)
+      }
+    }
   }
 
   renderDrawing(drawing) {
@@ -75,7 +116,7 @@ export default class {
   }
 
   clearCanvas() {
-    this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);  
+    this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
   }
 
   broadcastClearCanvas() {

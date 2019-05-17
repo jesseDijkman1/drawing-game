@@ -107,7 +107,11 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-  socket.emit("player - joined", {drawings: drawingsMemory, messages: messagesMemmory})
+  activeSessions[socket.id] = {};
+
+  socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory, users: activeSessions})
+
+  socket.broadcast.emit("player - joined", socket.id)
 
   socket.on("drawing - save/broadcast", (drawing, id) => {
     drawingsMemory[id] = drawing;
@@ -125,6 +129,12 @@ io.on("connection", async socket => {
     drawingsMemory = [];
 
     socket.broadcast.emit("canvas - clear")
+  })
+
+  socket.on("disconnect", () => {
+    delete activeSessions[socket.id];
+
+    io.emit("player - left", socket.id)
   })
 })
 
