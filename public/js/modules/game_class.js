@@ -1,4 +1,5 @@
 import socket from "./socketIO.js";
+import Templater from "./templater.js"
 
 export default class {
   constructor(canv, chat) {
@@ -39,8 +40,20 @@ export default class {
     })
   }
 
-  renderMessages(message) {
-    console.log(message)
+  async renderMessage(message) {
+    const template = `
+    <${this.chat.nodeName == "UL" ? "li" : "div"}>
+      <header>^userId^</header>
+      <p>^value^</p>
+      <footer>^time^</footer>
+    </${this.chat.nodeName == "UL" ? "li" : "div"}>`;
+
+    const msgEl = await new Templater(template, message).parse();
+
+    this.chat.appendChild(msgEl)
+
+
+
   }
 
   broadcast(drawing) {

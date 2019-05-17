@@ -2,8 +2,9 @@ import socket from "./socketIO.js";
 
 export default class {
   constructor(msg) {
+    console.log("cunt", msg)
     this.userId = socket.id;
-    this.message = msg;
+    this.value = msg;
     this.time = this.time(new Date());
   }
 

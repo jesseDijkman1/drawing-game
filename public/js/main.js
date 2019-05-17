@@ -7,7 +7,7 @@ import Message from "./modules/chatMessage_class.js"
 import socket from "./modules/socketIO.js";
 
 const canvas = document.getElementById("main-canvas");
-const chat = document.querySelector("#room-chat .chat-messages");
+const chat = document.querySelector("#chat-container .chat-messages");
 
 const penPreview = document.querySelector("#pen-preview div");
 const allSliders = document.querySelectorAll(".option input");
@@ -98,7 +98,7 @@ function startSliding(e) {
 function submitChatMsg(e) {
   e.preventDefault()
 
-  const val = e.target.querySelector("input");
+  const val = e.target.querySelector("input").value;
 
-  game.renderMessages(new Message(val))
+  game.renderMessage(new Message(val))
 }
