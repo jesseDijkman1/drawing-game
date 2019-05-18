@@ -107,9 +107,14 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-  activeSessions[socket.id] = {};
+  activeSessions[socket.id] = {
+    name: undefined,
+    score: 0
+  };
 
-  socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory, users: activeSessions})
+  io.emit("player - update all", activeSessions)
+
+  socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
 
   socket.broadcast.emit("player - joined", socket.id)
 

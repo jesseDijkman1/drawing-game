@@ -9,6 +9,7 @@ import socket from "./modules/socketIO.js";
 const canvContainer = document.querySelector("#room-content .canvas-container");
 const canvas = document.getElementById("main-canvas");
 const chat = document.querySelector("#game-extras .chat-container .chat-messages");
+const scoreboard = document.querySelector("#game-extras .scoreboard-container");
 
 const penPreview = document.querySelector("#pen-preview div");
 const allSliders = document.querySelectorAll(".option input[type=range]");
@@ -20,7 +21,7 @@ const penSize = document.querySelector(".pen-option-size");
 
 const chatForm = document.querySelector("#game-extras .chat-container form");
 
-const game = new Game(canvContainer, canvas, chat)
+const game = new Game(canvContainer, canvas, chat, scoreboard)
 
 void function iife() {
   canvas.setAttribute("width", canvas.offsetWidth)
@@ -57,8 +58,8 @@ function startDrawing(e) {
 
   function isDrawing(ev) {
     drawing.addPoint({
-      x: ev.clientX - ev.target.offsetLeft,
-      y: ev.clientY - ev.target.offsetTop
+      x: ev.clientX - ev.target.parentElement.offsetLeft,
+      y: ev.clientY - ev.target.parentElement.offsetTop
     })
 
     game.renderDrawing(drawing)

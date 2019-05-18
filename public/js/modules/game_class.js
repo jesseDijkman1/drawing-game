@@ -2,25 +2,32 @@ import socket from "./socketIO.js";
 import Templater from "./templater.js"
 
 export default class {
-  constructor(canvContainer, canv, chat) {
+  constructor(canvContainer, canv, chat, scoreboard) {
     this.canvContainer = canvContainer;
     this.canvas = canv;
     this.ctx = canv.getContext("2d");
     this.chat = chat;
+    this.scoreboard = scoreboard
     this.drawingsAmt = 0;
-    this.maxPlayers = 5;
+    this.minimumPlayers = 5;
     this.players = {};
 
-    socket.on("canvas - clear", () => {
-      this.clearCanvas()
-    })
+    socket.on("canvas - clear", () => this.clearCanvas())
 
-    socket.on("drawing - render", drawing => {
-      this.renderDrawing(drawing);
-    })
+    socket.on("drawing - render", drawing => this.renderDrawing(drawing))
 
-    socket.on("message - render", message => {
-      this.renderMessage(message);
+    socket.on("message - render", message => this.renderMessage(message))
+
+    socket.on("player - update all", players => {
+      this.players = players;
+
+      if (Object.keys(this.players).length >= this.minimumPlayers) {
+        this.updateGameStartIndicator(true)
+      } else {
+        this.updateGameStartIndicator()
+      }
+
+      this.updateScoreboard()
     })
 
     socket.on("player - joined/update", data => {
@@ -34,47 +41,62 @@ export default class {
       data.messages.forEach(message => {
         this.renderMessage(message);
       })
-
-      this.updateUsers()
-    })
-
-    socket.on("player - joined", userId => {
-      this.updateUsers(userId, true)
-    })
-
-    socket.on("player - left", userId => {
-      this.updateUsers(userId, false)
     })
   }
 
-  async updateUsers(userId = undefined, joined = undefined) {
-    if (userId) {
-      if (joined) {
-        this.players[userId] = {};
-      } else {
-        delete this.players[userId]
-      }
-    }
-
-    const usersAmt = Object.keys(this.players).length;
-
-    if (usersAmt == this.maxPlayers) {
-      console.log("start the game")
-    } else {
+  async updateGameStartIndicator(remove = undefined) {
       const template = `
       <div id="game-waiter">
         <p>^Waiting for players^</p>
-        <h1>^${usersAmt}/${this.maxPlayers}^</h1>
+        <h1>^${Object.keys(this.players).length}/${this.minimumPlayers}^</h1>
       </div>`;
 
       const el = await new Templater(template).parse();
-      const waiter = this.canvContainer.querySelector("#game-waiter");
 
-      if (waiter) {
-        this.canvContainer.replaceChild(el, waiter)
-      } else {
-        this.canvContainer.appendChild(el)
+      try {
+        const waiter = this.canvContainer.querySelector("#game-waiter")
+        if (remove) {
+          this.canvContainer.removeChild(el)
+        } else {
+          this.canvContainer.replaceChild(el, waiter)
+        }
+      } catch (e) {
+        if (!remove) {
+          this.canvContainer.appendChild(el)
+        }
       }
+  }
+
+  async updateScoreboard() {
+    const temp = [];
+
+    for (let player in this.players) {
+      temp.push(`
+        <tr>
+          <td>^${player}^</td>
+          <td>^${this.players[player].score}^</td>
+        </tr>
+        `)
+    }
+
+    const scoreboardTemplate = `
+      <table>
+        <tr>
+          <th>^User^</th>
+          <th>^Score^</th>
+        </tr>
+        ${temp.join("\n")}
+      </table>
+      `;
+
+
+    const el = await new Templater(scoreboardTemplate).parse();
+
+    try {
+      const scoreboard = this.scoreboard.querySelector("table")
+      this.scoreboard.replaceChild(el, scoreboard)
+    } catch (e) {
+      this.scoreboard.appendChild(el)
     }
   }
 
