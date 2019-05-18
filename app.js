@@ -20,6 +20,9 @@ const port = 5000;
 
 let drawingsMemory = [];
 let messagesMemmory = [];
+let game;
+
+const minimumPlayers = 2;
 
 const activeSessions = {};
 
@@ -63,6 +66,24 @@ class Message {
   }
 }
 
+class Game {
+  constructor(players) {
+    this.players = players
+    this.allIds = Object.keys(this.players);
+    this.currentDrawer;
+  }
+
+  pickPlayer() {}
+
+  start() {
+    this.currentDrawer = this.players[this.allIds[0]]
+  }
+
+  newRound() {
+
+  }
+}
+
 //////////////////
 //  Middleware  //
 //////////////////
@@ -100,19 +121,25 @@ app.get("/room/:id", (req, res) => {
   res.render("room.ejs", {roomData: rooms[roomIndex], roomId: roomIndex})
 })
 
-
-
 ///////////////
 //  Sockets  //
 ///////////////
 
 io.on("connection", async socket => {
   activeSessions[socket.id] = {
+    id: socket.id,
     name: undefined,
     score: 0
   };
 
   io.emit("player - update all", activeSessions)
+
+  if (Object.keys(activeSessions).length >= minimumPlayers) {
+    game = new Game(activeSessions);
+    game.start()
+
+    io.emit("game - start", game.currentDrawer);
+  }
 
   socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
 
@@ -139,7 +166,7 @@ io.on("connection", async socket => {
   socket.on("disconnect", () => {
     delete activeSessions[socket.id];
 
-    io.emit("player - left", socket.id)
+    io.emit("player - update all", activeSessions)
   })
 })
 

@@ -43,6 +43,19 @@ void function iife() {
   new PenPreview(penPreview, penColor, penSize)
 }()
 
+socket.on("game - start", currentDrawer => {
+  game.clearCanvas()
+  console.log(socket.id, currentDrawer.id)
+  if (socket.id == currentDrawer.id) {
+    game.currentDrawerId = currentDrawer.id;
+    game.start(true);
+  } else {
+    canvas.removeEventListener("mousedown", startDrawing)
+    game.hideDrawerUI()
+    game.start(false);
+  }
+})
+
 ///////////////////////
 //  Drawing Section  //
 ///////////////////////

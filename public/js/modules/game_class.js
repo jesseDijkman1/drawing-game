@@ -9,8 +9,9 @@ export default class {
     this.chat = chat;
     this.scoreboard = scoreboard
     this.drawingsAmt = 0;
-    this.minimumPlayers = 5;
+    this.minimumPlayers = 2;
     this.players = {};
+    this.currentDrawerId = undefined;
 
     socket.on("canvas - clear", () => this.clearCanvas())
 
@@ -20,6 +21,7 @@ export default class {
 
     socket.on("player - update all", players => {
       this.players = players;
+
 
       if (Object.keys(this.players).length >= this.minimumPlayers) {
         this.updateGameStartIndicator(true)
@@ -44,7 +46,22 @@ export default class {
     })
   }
 
+  start(isDrawer) {
+
+  }
+
+  showDrawerUI() {
+
+  }
+
+  hideDrawerUI() {
+    const options = this.canvContainer.querySelector(".canvas-options");
+
+    options.style.display = "none"
+  }
+
   async updateGameStartIndicator(remove = undefined) {
+    console.log(remove)
       const template = `
       <div id="game-waiter">
         <p>^Waiting for players^</p>
@@ -56,12 +73,14 @@ export default class {
       try {
         const waiter = this.canvContainer.querySelector("#game-waiter")
         if (remove) {
-          this.canvContainer.removeChild(el)
+          console.log("removing")
+          this.canvContainer.removeChild(waiter)
         } else {
           this.canvContainer.replaceChild(el, waiter)
         }
       } catch (e) {
         if (!remove) {
+          console.log("appending")
           this.canvContainer.appendChild(el)
         }
       }
@@ -101,23 +120,25 @@ export default class {
   }
 
   renderDrawing(drawing) {
-    this.ctx.lineJoin = "round";
-    this.ctx.strokeStyle = drawing.penColor;
-    this.ctx.lineWidth = drawing.penSize;
+    if (socket.id == this.currentDrawerId || this.currentDrawerId == undefined) {
+      this.ctx.lineJoin = "round";
+      this.ctx.strokeStyle = drawing.penColor;
+      this.ctx.lineWidth = drawing.penSize;
 
-    drawing.points.forEach((p, i, a) => {
-      this.ctx.beginPath();
+      drawing.points.forEach((p, i, a) => {
+        this.ctx.beginPath();
 
-      if (i == 0) {
-        this.ctx.moveTo(this.x, this.y)
-      } else {
-        this.ctx.moveTo(a[i - 1].x, a[i - 1].y)
-      }
+        if (i == 0) {
+          this.ctx.moveTo(this.x, this.y)
+        } else {
+          this.ctx.moveTo(a[i - 1].x, a[i - 1].y)
+        }
 
-      this.ctx.lineTo(p.x, p.y)
-      this.ctx.closePath()
-      this.ctx.stroke()
-    })
+        this.ctx.lineTo(p.x, p.y)
+        this.ctx.closePath()
+        this.ctx.stroke()
+      })
+    }
   }
 
   async renderMessage(message) {
@@ -134,7 +155,9 @@ export default class {
   }
 
   broadcastDrawing(drawing) {
-    socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
+    if (socket.id == this.currentDrawerId || this.currentDrawerId == undefined) {
+      socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
+    }
   }
 
   broadcastMessage(message) {
