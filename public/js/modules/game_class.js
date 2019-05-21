@@ -122,12 +122,11 @@ export default class {
       if (this.onlinePlayers.includes(player)) {
         temp.push(`
           <tr>
-            <td>^${player}^</td>
+            <td>^${this.allPlayers[player].name}^</td>
             <td>^${this.allPlayers[player].score}^</td>
           </tr>
           `)
       }
-
     }
 
     const scoreboardTemplate = `

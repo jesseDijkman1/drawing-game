@@ -335,8 +335,8 @@ button, input {
 }
 
 .user-message.my-message strong {
-
-  color: #FDC926;
+  display: none;
+  /* color: #FDC926; */
 }
 
 .user-message.my-message div::before {
