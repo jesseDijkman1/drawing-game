@@ -45,8 +45,8 @@ void function iife() {
 
 socket.on("game - start", currentDrawer => {
   game.clearCanvas()
-  console.log(socket.id, currentDrawer.id)
-  if (socket.id == currentDrawer.id) {
+
+  if (socket.id == currentDrawer.socketId) {
     game.currentDrawerId = currentDrawer.id;
     game.start(true);
   } else {
@@ -54,6 +54,16 @@ socket.on("game - start", currentDrawer => {
     game.hideDrawerUI()
     game.start(false);
   }
+})
+
+socket.on("game - stop", () => {
+  console.log("game - stop")
+
+  game.clearCanvas()
+  game.showDrawerUI()
+  game.updateGameStartIndicator()
+
+  game.currentDrawerId = undefined
 })
 
 ///////////////////////

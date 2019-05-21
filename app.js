@@ -10,7 +10,8 @@ const express = require("express"),
       http = require("http"),
       ejs = require("ejs"),
       cookieParser = require("cookie-parser"),
-      cookie = require("cookie")
+      cookie = require("cookie"),
+      bodyParser = require("body-parser");
 
 /////////////////
 //  Constants  //
@@ -79,6 +80,10 @@ class Game {
     this.currentDrawer = this.players[this.allIds[0]]
   }
 
+  stop() {
+    this.currentDrawer = undefined;
+  }
+
   newRound() {
 
   }
@@ -94,11 +99,14 @@ const app = express(),
 
 app.set("view engine", "ejs");
 app.set("views", "views");
-app.use(cookieParser())
 app.use(express.static("public"))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(cookieParser())
 app.use(session({
   secret: "classified"
-
 }));
 
 ///////////////
@@ -107,18 +115,42 @@ app.use(session({
 
 
 app.get("/", (req, res) => {
-  // res.render("lobby.ejs", {rooms: rooms})
-  res.redirect("/room/1")
-
-
-  // updateSessions(req) // Probably useless
+  if (req.session.id in activeSessions) {
+    res.redirect("/room/1")
+  } else {
+    res.redirect("/create_account")
+  }
 })
 
 app.get("/room/:id", (req, res) => {
   const roomIndex = parseInt(req.params.id)
 
+  if (req.session.id in activeSessions) {
+    res.render("room.ejs", {roomData: rooms[roomIndex], roomId: roomIndex})
+  } else {
+    res.redirect("/create_account")
+  }
+})
 
-  res.render("room.ejs", {roomData: rooms[roomIndex], roomId: roomIndex})
+app.get("/create_account", (req, res) => {
+  const id = req.session.id;
+
+  activeSessions[id] = {
+    socketId: undefined,
+    name: undefined,
+    score: 0
+  }
+
+  res.render("account_maker.ejs")
+})
+
+app.post("/updateAccount", (req, res) => {
+  const id = req.session.id;
+  const userName = req.body.user_name;
+
+  activeSessions[id].name = userName;
+
+  res.redirect("room/1")
 })
 
 ///////////////
@@ -126,19 +158,18 @@ app.get("/room/:id", (req, res) => {
 ///////////////
 
 io.on("connection", async socket => {
-  activeSessions[socket.id] = {
-    id: socket.id,
-    name: undefined,
-    score: 0
-  };
+  const sessionId = await cookieSession(socket);
+
+  if (sessionId in activeSessions) {
+    activeSessions[sessionId].socketId = socket.id
 
   io.emit("player - update all", activeSessions)
 
-  if (Object.keys(activeSessions).length >= minimumPlayers) {
-    game = new Game(activeSessions);
-    game.start()
+  if (onlineSesssionsAmt() >= minimumPlayers) {
+      game = new Game(activeSessions);
+      game.start()
 
-    io.emit("game - start", game.currentDrawer);
+      io.emit("game - start", game.currentDrawer);
   }
 
   socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
@@ -164,10 +195,40 @@ io.on("connection", async socket => {
   })
 
   socket.on("disconnect", () => {
-    delete activeSessions[socket.id];
+    activeSessions[sessionId].socketId = undefined;
+
+    if (onlineSesssionsAmt() < minimumPlayers) {
+      if (game) {
+        game.stop()
+      }
+
+      io.emit("game - stop")
+    }
 
     io.emit("player - update all", activeSessions)
   })
+} else {
+  console.log("player unknown")
+}
 })
 
 server.listen(port, () => console.log(`Listening to port: ${port}`));
+
+function cookieSession(socket) {
+  return new Promise((resolve, reject) => {
+    const rough = cookie.parse(socket.request.headers.cookie)["connect.sid"],
+          rx = /(?<=s:).+?(?=\.)/;
+
+     resolve(rx.exec(rough)[0])
+  })
+}
+
+function onlineSesssionsAmt() {
+  let temp = 0;
+
+  for (let s in activeSessions) {
+    if (activeSessions[s].socketId) temp++
+  }
+
+  return temp
+}

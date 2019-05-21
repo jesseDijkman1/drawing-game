@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<% const pageTitle = `Create Account` %>
+<% const directoryDepth = "../" %>
+
+<%- include partials/head %>
+
+<body>
+
+  <form action="/updateAccount" method="post">
+    <input type="text" name="user_name" value="" placeholder="User Name" required>
+    <button type="submit">Ready</button>
+  </form>
+
+  <%- include partials/scripts %>
+
+</body>
+</html>

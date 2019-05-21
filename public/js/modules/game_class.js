@@ -1,6 +1,8 @@
 import socket from "./socketIO.js";
 import Templater from "./templater.js"
 
+const _onlineClients = [];
+
 export default class {
   constructor(canvContainer, canv, chat, scoreboard) {
     this.canvContainer = canvContainer;
@@ -10,8 +12,9 @@ export default class {
     this.scoreboard = scoreboard
     this.drawingsAmt = 0;
     this.minimumPlayers = 2;
-    this.players = {};
+    this.allPlayers = {};
     this.currentDrawerId = undefined;
+
 
     socket.on("canvas - clear", () => this.clearCanvas())
 
@@ -20,10 +23,12 @@ export default class {
     socket.on("message - render", message => this.renderMessage(message))
 
     socket.on("player - update all", players => {
-      this.players = players;
+      this.allPlayers = players;
+      this.onlinePlayers = this.allPlayers;
 
+      console.log(this.onlinePlayers)
 
-      if (Object.keys(this.players).length >= this.minimumPlayers) {
+      if (this.onlinePlayers.length >= this.minimumPlayers) {
         this.updateGameStartIndicator(true)
       } else {
         this.updateGameStartIndicator()
@@ -34,7 +39,7 @@ export default class {
 
     socket.on("player - joined/update", data => {
       this.drawingsAmt = data.drawings.length;
-      this.players = data.users
+      this.allPlayers = data.users
 
       data.drawings.forEach(drawing => {
         this.renderDrawing(drawing);
@@ -46,26 +51,52 @@ export default class {
     })
   }
 
+  get onlinePlayers() {
+    return _onlineClients
+  }
+
+  set onlinePlayers(all) {
+    let temp = 0;
+
+    for (let p in all) {
+      if (all[p].socketId) {
+        if (_onlineClients.indexOf(p) < 0) {
+          _onlineClients.push(p)
+        }
+
+      } else {
+        const i = _onlineClients.indexOf(p);
+
+        if (i > 0) {
+          _onlineClients.splice(i, 1)
+        }
+      }
+    }
+  }
+
   start(isDrawer) {
 
   }
 
   showDrawerUI() {
+    const options = this.canvContainer.querySelector(".canvas-options");
 
+    options.style.display = "flex"
   }
 
   hideDrawerUI() {
     const options = this.canvContainer.querySelector(".canvas-options");
 
     options.style.display = "none"
+
+    // docuemnt.body.appendChild(document.createTextNode(`${this.currentDrawer} is drawing`))
   }
 
   async updateGameStartIndicator(remove = undefined) {
-    console.log(remove)
       const template = `
       <div id="game-waiter">
         <p>^Waiting for players^</p>
-        <h1>^${Object.keys(this.players).length}/${this.minimumPlayers}^</h1>
+        <h1>^${this.onlinePlayers.length}/${this.minimumPlayers}^</h1>
       </div>`;
 
       const el = await new Templater(template).parse();
@@ -73,14 +104,12 @@ export default class {
       try {
         const waiter = this.canvContainer.querySelector("#game-waiter")
         if (remove) {
-          console.log("removing")
           this.canvContainer.removeChild(waiter)
         } else {
           this.canvContainer.replaceChild(el, waiter)
         }
       } catch (e) {
         if (!remove) {
-          console.log("appending")
           this.canvContainer.appendChild(el)
         }
       }
@@ -89,13 +118,16 @@ export default class {
   async updateScoreboard() {
     const temp = [];
 
-    for (let player in this.players) {
-      temp.push(`
-        <tr>
-          <td>^${player}^</td>
-          <td>^${this.players[player].score}^</td>
-        </tr>
-        `)
+    for (let player in this.allPlayers) {
+      if (this.onlinePlayers.includes(player)) {
+        temp.push(`
+          <tr>
+            <td>^${player}^</td>
+            <td>^${this.allPlayers[player].score}^</td>
+          </tr>
+          `)
+      }
+
     }
 
     const scoreboardTemplate = `
@@ -170,5 +202,9 @@ export default class {
 
   broadcastClearCanvas() {
     socket.emit("drawing - clear all")
+  }
+
+  isCurrentDrawer(obj) {
+    console.log("cunt", obj)
   }
 }

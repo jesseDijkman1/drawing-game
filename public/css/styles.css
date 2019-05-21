@@ -259,7 +259,7 @@ button, input {
 
 #game-waiter h1 {
   transform-origin: top center;
-  animation: pop 1s ease;
+  animation: pop .4s ease-in-out;
   background: #4de2a7;
   margin-top: .5em;
   padding: 1em;
