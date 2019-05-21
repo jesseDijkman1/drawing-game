@@ -131,10 +131,10 @@ function submitChatMsg(e) {
   e.preventDefault()
 
   const input = e.target.querySelector("input");
-  const msg = new Message(input.value);
 
-  game.renderMessage(msg);
-  game.broadcastMessage(msg);
+  socket.emit("message - create", input.value)
+
+
 
   // Reset the input
   input.value = ""

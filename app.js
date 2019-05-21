@@ -49,21 +49,17 @@ const rooms = [
 ]
 
 class Message {
-  constructor(data) {
-    this.sessionID = data.sessionID;
-    this.socketID = data.socketID
-    this.name = data.name;
-    this.class;
-    this.message;
+  constructor(sessionId, msg) {
+    this.user = activeSessions[sessionId];
+    this.msg = msg;
+    this.time = this.time(new Date())
   }
 
-  lobby() {
-    return new Promise((resolve, reject) => {
-      this.message = `${this.name || this.socketID} joined the room`;
-      this.class = "lobby";
+  time(date) {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
 
-      resolve(this)
-    })
+    return `${hours < 10 ? 0 : ""}${hours}:${minutes < 10 ? 0 : ""}${minutes}`
   }
 }
 
@@ -182,10 +178,12 @@ io.on("connection", async socket => {
     socket.broadcast.emit("drawing - render", drawing)
   })
 
-  socket.on("message - save/broadcast", message => {
-    messagesMemmory.push(message);
+  socket.on("message - create", val => {
+    const msg = new Message(sessionId, val)
 
-    socket.broadcast.emit("message - render", message)
+    messagesMemmory.push(msg);
+
+    return io.emit("message - render", msg)
   })
 
   socket.on("drawing - clear all", () => {

@@ -15,12 +15,12 @@ export default class {
     this.allPlayers = {};
     this.currentDrawerId = undefined;
 
+    socket.on("message - render", data => this.renderMessage(data))
 
     socket.on("canvas - clear", () => this.clearCanvas())
 
     socket.on("drawing - render", drawing => this.renderDrawing(drawing))
 
-    socket.on("message - render", message => this.renderMessage(message))
 
     socket.on("player - update all", players => {
       this.allPlayers = players;
@@ -173,16 +173,17 @@ export default class {
     }
   }
 
-  async renderMessage(message) {
+  async renderMessage(data) {
     const template = `
     <${this.chat.nodeName == "UL" ? "li" : "div"}>
-      <header>^${message.userId}^</header>
-      <p>^${message.value}^</p>
-      <footer>^${message.time}^</footer>
+      <header>^${data.user.name || data.user.userId}^</header>
+      <p>^${data.msg}^</p>
+      <footer>^${data.time}^</footer>
     </${this.chat.nodeName == "UL" ? "li" : "div"}>`;
 
-    const msgEl = await new Templater(template, message).parse();
+    const msgEl = await new Templater(template).parse();
 
+    console.log(data)
     this.chat.appendChild(msgEl)
   }
 
@@ -190,10 +191,6 @@ export default class {
     if (socket.id == this.currentDrawerId || this.currentDrawerId == undefined) {
       socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
     }
-  }
-
-  broadcastMessage(message) {
-    socket.emit("message - save/broadcast", message)
   }
 
   clearCanvas() {
@@ -205,6 +202,6 @@ export default class {
   }
 
   isCurrentDrawer(obj) {
-    console.log("cunt", obj)
+    // console.log("cunt", obj)
   }
 }
