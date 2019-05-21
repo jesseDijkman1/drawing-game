@@ -2,8 +2,6 @@ export default class {
   constructor() {}
 
   get color() {
-    this.color = this.colorInputs
-
     return this.penColor;
   }
 

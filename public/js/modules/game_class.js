@@ -17,22 +17,25 @@ export default class {
 
     socket.on("message - render", data => this.renderMessage(data))
 
-    socket.on("canvas - clear", () => this.clearCanvas())
+    socket.on("canvas - clear", () => {
+      this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
+    })
 
     socket.on("drawing - render", drawing => this.renderDrawing(drawing))
 
+    socket.on("game - update timer", percentage => {
+      this.canvContainer.querySelector("#timer").style.width = `${percentage}%`
+    })
 
     socket.on("player - update all", players => {
       this.allPlayers = players;
       this.onlinePlayers = this.allPlayers;
 
-      console.log(this.onlinePlayers)
-
-      if (this.onlinePlayers.length >= this.minimumPlayers) {
-        this.updateGameStartIndicator(true)
-      } else {
-        this.updateGameStartIndicator()
-      }
+      // if (this.onlinePlayers.length >= this.minimumPlayers) {
+      //   this.updateGameStartIndicator(true)
+      // } else {
+      //   this.updateGameStartIndicator()
+      // }
 
       this.updateScoreboard()
     })
@@ -75,21 +78,6 @@ export default class {
   }
 
   start(isDrawer) {
-
-  }
-
-  showDrawerUI() {
-    const options = this.canvContainer.querySelector(".canvas-options");
-
-    options.style.display = "flex"
-  }
-
-  hideDrawerUI() {
-    const options = this.canvContainer.querySelector(".canvas-options");
-
-    options.style.display = "none"
-
-    // docuemnt.body.appendChild(document.createTextNode(`${this.currentDrawer} is drawing`))
   }
 
   async updateGameStartIndicator(remove = undefined) {
@@ -151,7 +139,6 @@ export default class {
   }
 
   renderDrawing(drawing) {
-    if (socket.id == this.currentDrawerId || this.currentDrawerId == undefined) {
       this.ctx.lineJoin = "round";
       this.ctx.strokeStyle = drawing.penColor;
       this.ctx.lineWidth = drawing.penSize;
@@ -169,7 +156,6 @@ export default class {
         this.ctx.closePath()
         this.ctx.stroke()
       })
-    }
   }
 
   async renderMessage(data) {
@@ -184,7 +170,6 @@ export default class {
 
     const msgEl = await new Templater(template).parse();
 
-    console.log(data)
     this.chat.appendChild(msgEl)
   }
 
@@ -195,11 +180,16 @@ export default class {
   }
 
   clearCanvas() {
-    this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
+    socket.emit("drawing - clear all")
+  }
+
+  clearChat() {
+    socket.emit("message - clear all")
+    this.chat.innerHTML = "";
   }
 
   broadcastClearCanvas() {
-    socket.emit("drawing - clear all")
+
   }
 
   isCurrentDrawer(obj) {

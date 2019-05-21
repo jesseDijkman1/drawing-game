@@ -79,12 +79,13 @@ class Game {
     this.players = players
     this.allIds = Object.keys(this.players);
     this.currentDrawer;
+    this.index = 0;
   }
 
   pickPlayer() {}
 
   start() {
-    this.currentDrawer = this.players[this.allIds[0]]
+    this.currentDrawer = this.players[this.allIds[this.index]]
   }
 
   stop() {
@@ -170,55 +171,74 @@ io.on("connection", async socket => {
   if (sessionId in activeSessions) {
     activeSessions[sessionId].socketId = socket.id
 
-  io.emit("player - update all", activeSessions)
+    io.emit("player - update all", activeSessions)
 
-  if (onlineSesssionsAmt() >= minimumPlayers) {
+    if (onlineSesssionsAmt() >= minimumPlayers) {
       game = new Game(activeSessions);
       game.start()
 
-      io.emit("game - start", game.currentDrawer);
-  }
+      let counter = 0;
+      const max = 10000;
+      const i = 1000;
+      const timer = setInterval(() => {
+        if (counter >= max) {
+          clearInterval(timer)
 
-  socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
+          // Mkae new round
+        } else {
+          counter += i;
 
-  socket.broadcast.emit("player - joined", socket.id)
+          io.emit("game - update timer", ((max - counter) / max) * 100)
+        }
+      }, i)
 
-  socket.on("drawing - save/broadcast", (drawing, id) => {
-    drawingsMemory[id] = drawing;
-
-    socket.broadcast.emit("drawing - render", drawing)
-  })
-
-  socket.on("message - create", val => {
-    const msg = new Message(sessionId, val)
-
-    messagesMemmory.push(msg);
-
-    io.emit("message - render", msg)
-  })
-
-  socket.on("drawing - clear all", () => {
-    drawingsMemory = [];
-
-    socket.broadcast.emit("canvas - clear")
-  })
-
-  socket.on("disconnect", () => {
-    activeSessions[sessionId].socketId = undefined;
-
-    if (onlineSesssionsAmt() < minimumPlayers) {
-      if (game) {
-        game.stop()
-      }
-
-      io.emit("game - stop")
+      io.emit("game - start", game.currentDrawer)
     }
 
-    io.emit("player - update all", activeSessions)
-  })
-} else {
-  console.log("player unknown")
-}
+    socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
+
+    socket.broadcast.emit("player - joined", socket.id)
+
+    socket.on("drawing - save/broadcast", (drawing, id) => {
+      drawingsMemory[id] = drawing;
+
+      socket.broadcast.emit("drawing - render", drawing)
+    })
+
+    socket.on("message - create", val => {
+      const msg = new Message(sessionId, val)
+
+      messagesMemmory.push(msg);
+
+      io.emit("message - render", msg)
+    })
+
+    socket.on("drawing - clear all", () => {
+      drawingsMemory = [];
+
+      io.emit("canvas - clear")
+    })
+
+    socket.on("message - clear all", () => {
+      messagesMemmory = [];
+    })
+
+    socket.on("disconnect", () => {
+      activeSessions[sessionId].socketId = undefined;
+
+      if (onlineSesssionsAmt() < minimumPlayers) {
+        if (game) {
+          game.stop()
+        }
+
+        io.emit("game - stop")
+      }
+
+      io.emit("player - update all", activeSessions)
+    })
+  } else {
+    console.log("player unknown")
+  }
 })
 
 server.listen(port, () => console.log(`Listening to port: ${port}`));

@@ -34,36 +34,23 @@ void function iife() {
 
   chatForm.addEventListener("submit", submitChatMsg)
 
+
+
   canvasClear.addEventListener("click", () => {
-    game.clearCanvas.bind(game)
-    game.broadcastClearCanvas()
+    game.clearCanvas()
+    // game.broadcastClearCanvas()
   })
 
   new PenPreview(penPreview, penColor, penSize)
 }()
 
 socket.on("game - start", currentDrawer => {
-  game.clearCanvas()
-
-  if (socket.id == currentDrawer.socketId) {
-    game.currentDrawerId = currentDrawer.id;
-    game.start(true);
-  } else {
-    canvas.removeEventListener("mousedown", startDrawing)
-    game.hideDrawerUI()
-    game.start(false);
-  }
+  setTimeout(() => {
+    game.clearCanvas()
+    game.clearChat()
+  }, 0)
 })
 
-socket.on("game - stop", () => {
-  console.log("game - stop")
-
-  game.clearCanvas()
-  game.showDrawerUI()
-  game.updateGameStartIndicator()
-
-  game.currentDrawerId = undefined
-})
 
 ///////////////////////
 //  Drawing Section  //

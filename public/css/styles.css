@@ -49,6 +49,16 @@ button, input {
   position: relative;
 }
 
+#timer {
+  position: absolute;
+  height: 10px;
+  background: red;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  transition: width 1s linear;
+}
+
 #room-content canvas {
   border: solid 1px black;
   width: 100%;
@@ -335,8 +345,10 @@ button, input {
 }
 
 .user-message.my-message strong {
-  display: none;
+  /* display: none; */
   /* color: #FDC926; */
+  line-height: .5em;
+  opacity: 0;
 }
 
 .user-message.my-message div::before {
