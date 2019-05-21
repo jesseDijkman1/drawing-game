@@ -3,7 +3,6 @@
 import Game from "./modules/game_class.js";
 import PenPreview from "./modules/penPreview_class.js";
 import Drawing from "./modules/drawing_class.js";
-import Message from "./modules/chatMessage_class.js"
 import socket from "./modules/socketIO.js";
 
 const canvContainer = document.querySelector("#room-content .canvas-container");
