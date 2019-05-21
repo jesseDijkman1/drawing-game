@@ -52,7 +52,18 @@ class Message {
   constructor(sessionId, msg) {
     this.user = activeSessions[sessionId];
     this.msg = msg;
-    this.time = this.time(new Date())
+    this.time = this.time(new Date());
+    this.connected = this.isConnected()
+  }
+
+  isConnected() {
+    if (messagesMemmory.length >= 1) {
+      if (messagesMemmory[messagesMemmory.length - 1].user.socketId === this.user.socketId) {
+        return true
+      } else {
+        return false
+      }
+    }
   }
 
   time(date) {
@@ -183,7 +194,7 @@ io.on("connection", async socket => {
 
     messagesMemmory.push(msg);
 
-    return io.emit("message - render", msg)
+    io.emit("message - render", msg)
   })
 
   socket.on("drawing - clear all", () => {

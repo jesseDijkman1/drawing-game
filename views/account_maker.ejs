@@ -7,13 +7,13 @@
 <%- include partials/head %>
 
 <body>
+  <h1>Create an account name</h1>
 
-  <form action="/updateAccount" method="post">
-    <input type="text" name="user_name" value="" placeholder="User Name" required>
+  <form class="account-name-form" action="/updateAccount" method="post">
+    <input type="text" name="user_name" value="" placeholder="User Name" pattern=".{4,}" required>
+    <small>Min 4 characters</small>
     <button type="submit">Ready</button>
   </form>
-
-  <%- include partials/scripts %>
 
 </body>
 </html>

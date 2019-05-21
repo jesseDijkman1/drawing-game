@@ -175,10 +175,12 @@ export default class {
 
   async renderMessage(data) {
     const template = `
-    <${this.chat.nodeName == "UL" ? "li" : "div"}>
-      <header>^${data.user.name || data.user.userId}^</header>
-      <p>^${data.msg}^</p>
-      <footer>^${data.time}^</footer>
+    <${this.chat.nodeName == "UL" ? "li" : "div"} class="user-message ${(data.user.socketId == socket.id) ? 'my-message' : null}">
+      <strong ${data.connected ? 'style="display:none"' : null}>^${data.user.name || data.user.socketId}^</strong>
+      <div>
+        <p>^${data.msg}^</p>
+        <span>^${data.time}^</span>
+      </div>
     </${this.chat.nodeName == "UL" ? "li" : "div"}>`;
 
     const msgEl = await new Templater(template).parse();

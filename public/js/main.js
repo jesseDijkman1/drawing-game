@@ -133,8 +133,5 @@ function submitChatMsg(e) {
 
   socket.emit("message - create", input.value)
 
-
-
-  // Reset the input
   input.value = ""
 }

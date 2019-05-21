@@ -1,3 +1,7 @@
+:root {
+  --color-green-light: #58E9AE;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -94,8 +98,9 @@ button, input {
 
 #game-extras .chat-container ul {
   height: 100%;
-  background: #303030;
+  background: #292929;
   overflow-y: scroll;
+  padding: 1em;
 }
 
 #game-extras .chat-container form {
@@ -276,4 +281,97 @@ button, input {
   100% {
     transform: scale(1)
   }
+}
+
+.account-name-form {
+  max-width: 400px;
+  min-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5rem;
+  background: #4de2a7;
+  padding: 1em;
+}
+
+.account-name-form input {
+  font-size: inherit;
+  background: rgba(0,0,0,.2);
+  padding: .25em .5em;
+  box-shadow: inset 0px 2px 5px 0px rgba(0,0,0,0.13);
+}
+
+.account-name-form small {
+  font-size: .7em;
+  padding: .1em .5em;
+  margin-bottom: 1em;
+  color: rgba(0,0,0,.75)
+}
+
+.account-name-form input::placeholder {
+  color: rgba(0,0,0,.5);
+}
+
+.account-name-form button {
+  font-size: inherit;
+  padding: .25em .5em;
+  background: white;
+  opacity: .8;
+  border-radius: .2em;
+}
+
+.account-name-form button:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.user-message {
+  position: relative;
+  width: 90%;
+}
+
+.user-message.my-message {
+  margin-left: auto;
+}
+
+.user-message.my-message strong {
+
+  color: #FDC926;
+}
+
+.user-message.my-message div::before {
+  background:#FDC926;
+}
+
+.user-message strong {
+  display: block;
+  font-weight: bold;
+  color: var(--color-green-light);
+}
+
+.user-message:not(:first-child) strong {
+  padding-top: 1em;
+}
+
+.user-message div {
+  display: flex;
+  background: rgba(0,0,0,.40);
+  color: white;
+  line-height: 1.75em;
+  margin-top: .25em;
+}
+
+.user-message div::before {
+  content: '';
+  display: block;
+  min-width: .25em;
+  background: var(--color-green-light);
+  margin-right: .5em;
+}
+
+.user-message div span {
+  margin-left: auto;
+  padding-right: .5em;
+  opacity: .5;
+  align-self: flex-end;
 }
