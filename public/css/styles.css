@@ -387,3 +387,37 @@ button, input {
   opacity: .5;
   align-self: flex-end;
 }
+
+.words-menu {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10%;
+  background: white;
+}
+
+.words-menu::after {
+  content: attr(data-time);
+}
+
+.words-menu button {
+  background: var(--color-green-light);
+  font-weight: bold;
+  font-size: 2rem;
+  line-height: 2em;
+  margin-bottom: 1em;
+  width: 100%;
+  max-width: 320px;
+  transition: transform .3s ease;
+}
+
+.words-menu button:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  opacity: .9;
+}

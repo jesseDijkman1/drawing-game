@@ -30,8 +30,6 @@ void function iife() {
     allSliders[i].addEventListener("mousedown", startSliding)
   }
 
-  canvas.addEventListener("mousedown", startDrawing)
-
   chatForm.addEventListener("submit", submitChatMsg)
 
   canvasClear.addEventListener("click", () => {
@@ -41,10 +39,22 @@ void function iife() {
   new PenPreview(penPreview, penColor, penSize)
 }()
 
-socket.on("game - start", currentDrawer => {
-  setTimeout(() => {
+socket.on("game - start", data => {
+  setTimeout(async () => {
     game.clearCanvas()
     game.clearChat()
+
+    if (socket.id == data.currentDrawer.socketId) {
+      canvas.addEventListener("mousedown", startDrawing);
+    } else {
+      canvas.removeEventListener("mousedown", startDrawing);
+    }
+
+    if (socket.id == data.currentDrawer.socketId) {
+      const word = await game.pickWord(data.words);
+      
+      socket.emit("game - picked a word", word);
+    }
   }, 0)
 })
 
@@ -125,7 +135,5 @@ function submitChatMsg(e) {
 }
 
 // socket.on("game - new drawer", id => {
-//   if (socket.id == id) {
-//     canvas.addEventListener("mousedown", startDrawing)
-//   }
+//
 // })

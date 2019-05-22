@@ -21,7 +21,7 @@ const port = process.env.PORT || 5000;
 
 let drawingsMemory = [];
 let messagesMemmory = [];
-let game;
+let game = undefined;
 
 const minimumPlayers = 2;
 
@@ -76,26 +76,59 @@ class Message {
 
 let _allNouns;
 
+class Timer {
+  constructor(start, end, step) {
+    this.start = start;
+    this.end = end;
+    this.step = step;
+
+  }
+
+  run(cb) {
+    const timer = setInterval(() => {
+      if (this.start >= this.end) {
+        clearInterval(timer)
+
+        return cb()
+      } else {
+        this.start += this.step;
+      }
+    }, this.step)
+  }
+}
+
 class Game {
   constructor(players) {
     this.players = players
-    this.allIds = Object.keys(this.players);
-    this.currentDrawer;
-    this.index = 0;
+    this.allIds = undefined
+    this.drawer = undefined;
   }
-
-  pickPlayer() {}
 
   start() {
-    this.currentDrawer = this.players[this.allIds[this.index]]
+    this.allIds = Object.keys(this.players);
+    this.drawer = this.newDrawer();
+
   }
 
-  stop() {
-    this.currentDrawer = undefined;
+  randomWords() {
+    const collection = [];
+
+    for (let i = 0; i < 4; i++) {
+
+      const index = Math.floor(Math.random() * this.nouns.length);
+      console.log(this.nouns.length, index)
+      collection.push(this.nouns.splice(index, 1))
+    }
+
+    return collection;
   }
 
-  newRound() {
+  newDrawer() {
+    if (!this.allIds.length) {
+      this.allIds = Object.keys(this.players);
+    }
 
+    return this.players[this.allIds.shift()]
   }
 }
 
@@ -167,8 +200,6 @@ app.post("/updateAccount", (req, res) => {
 //  Sockets  //
 ///////////////
 
-
-
 io.on("connection", async socket => {
   const sessionId = await cookieSession(socket);
 
@@ -177,32 +208,26 @@ io.on("connection", async socket => {
 
     io.emit("player - update all", allSessions)
 
-    if (onlineSesssionsAmt() >= minimumPlayers) {
-      game = new Game(allSessions);
-      game.nouns = await allNouns()
-      game.start()
+    if (!game) {
+      if (onlineSesssionsAmt() >= minimumPlayers) {
+        game = new Game(allSessions);
+        game.nouns = await allNouns()
+        game.start()
 
-      socket.emit("game - new drawer", socket.id)
+        console.log(game.drawer)
 
-      let counter = 0;
-
-      const max = 10000;
-      const i = 1000;
-
-      const timer = setInterval(() => {
-        if (counter >= max) {
-          clearInterval(timer)
-
-          // Mkae new round
-        } else {
-          counter += i;
-
-          io.emit("game - update timer", ((max - counter) / max) * 100)
-        }
-      }, i)
-
-      io.emit("game - start", game.currentDrawer)
+        io.emit("game - start", {
+          currentDrawer: game.drawer,
+          words: game.randomWords()
+        })
+      }
     }
+
+    // Game Functions
+    socket.on("game - picked a word", word => {
+      console.log("hello", word)
+    })
+
 
     socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
 

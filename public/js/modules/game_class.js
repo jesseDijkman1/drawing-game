@@ -1,5 +1,6 @@
 import socket from "./socketIO.js";
-import Templater from "./templater.js"
+import Templater from "./templater.js";
+import Timer from "./timer_class.js";
 
 const _onlineClients = [];
 
@@ -189,4 +190,42 @@ export default class {
     socket.emit("message - clear all")
   }
 
+  async pickWord(words) {
+    const template = `
+    <section class="words-menu" data-time="5">
+      <button type="button" value="${words[0]}">^${words[0]}^</button>
+      <button type="button" value="${words[1]}">^${words[1]}^</button>
+      <button type="button" value="${words[2]}">^${words[2]}^</button>
+      <button type="button" value="${words[3]}">^${words[3]}^</button>
+    </section>`;
+
+    const wordsMenu = await new Templater(template).parse();
+
+    this.canvContainer.appendChild(wordsMenu);
+
+    const wordsOptions = this.canvContainer.querySelectorAll(".words-menu button")
+
+    return new Promise((resolve, reject) => {
+      const timer = new Timer(0, 5000, 1000)
+
+      for (let i = 0; i < wordsOptions.length; i++) {
+        wordsOptions[i].addEventListener("click", e => {
+          this.canvContainer.removeChild(wordsMenu)
+          timer.clear()
+
+          resolve(e.target.value)
+        })
+      }
+
+      timer.interval((timeUp, timeDown) => {
+        wordsMenu.setAttribute("data-time", timeDown / 1000)
+      })
+
+      timer.timeout(() => {
+        this.canvContainer.removeChild(wordsMenu)
+
+        resolve(words[Math.floor(Math.random() * words.length)])
+      })
+    })
+  }
 }
