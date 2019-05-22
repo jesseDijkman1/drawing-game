@@ -239,10 +239,10 @@ io.on("connection", async socket => {
 
     socket.broadcast.emit("player - joined", socket.id)
 
-    socket.on("drawing - save/broadcast", (drawing, id) => {
+    socket.on("canvas - save/broadcast", (drawing, id) => {
       drawingsMemory[id] = drawing;
 
-      socket.broadcast.emit("drawing - render", drawing)
+      socket.broadcast.emit("canvas - render", drawing)
     })
 
     socket.on("message - create", async val => {
@@ -264,7 +264,7 @@ io.on("connection", async socket => {
       }
     })
 
-    socket.on("drawing - clear all", () => {
+    socket.on("canvas - clear all", () => {
       drawingsMemory = [];
 
       io.emit("canvas - clear")

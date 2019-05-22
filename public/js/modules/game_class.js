@@ -15,50 +15,6 @@ export default class {
     this.minimumPlayers = 2;
     this.allPlayers = {};
     this.currentDrawerId = undefined;
-
-    socket.on("message - render", data => this.renderMessage(data))
-
-    socket.on("canvas - clear", () => {
-      this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
-    })
-
-    socket.on("message - clear", () => {
-      this.chat.innerHTML = "";
-    })
-
-    socket.on("drawing - render", drawing => this.renderDrawing(drawing))
-
-    socket.on("game - update timer", percentage => {
-      this.canvContainer.querySelector("#timer").style.width = `${percentage}%`
-    })
-
-    socket.on("game - round end", data => this.roundEnd(data))
-
-    socket.on("player - update all", players => {
-      this.allPlayers = players;
-      this.onlinePlayers = this.allPlayers;
-
-      // if (this.onlinePlayers.length >= this.minimumPlayers) {
-      //   this.updateGameStartIndicator(true)
-      // } else {
-      //   this.updateGameStartIndicator()
-      // }
-
-      this.updateScoreboard()
-    })
-
-    socket.on("player - joined/update", data => {
-      this.drawingsAmt = data.drawings.length;
-      this.allPlayers = data.users
-
-      data.drawings.forEach(drawing => {
-        this.renderDrawing(drawing);
-      })
-
-      data.messages.forEach(message => {
-        this.renderMessage(message);
-      })
-    })
   }
 
   get onlinePlayers() {
@@ -134,7 +90,6 @@ export default class {
       </table>
       `;
 
-
     const el = await new Templater(scoreboardTemplate).parse();
 
     try {
@@ -181,11 +136,11 @@ export default class {
   }
 
   broadcastDrawing(drawing) {
-    socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
+    socket.emit("canvas - save/broadcast", drawing, this.drawingsAmt)
   }
 
   clearCanvas() {
-    socket.emit("drawing - clear all")
+    socket.emit("canvas - clear all")
   }
 
   clearChat() {

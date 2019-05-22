@@ -39,33 +39,13 @@ void function iife() {
   new PenPreview(penPreview, penColor, penSize)
 }()
 
-socket.on("game - start", data => {
-  setTimeout(async () => {
-    game.clearCanvas()
-    game.clearChat()
 
-    if (socket.id == data.currentDrawer.socketId) {
-      canvas.addEventListener("mousedown", startDrawing);
-    } else {
-      canvas.removeEventListener("mousedown", startDrawing);
-    }
-
-    if (socket.id == data.currentDrawer.socketId) {
-      const word = await game.pickWord(data.words);
-      
-      socket.emit("game - picked a word", word);
-    }
-  }, 0)
-})
 
 
 ///////////////////////
 //  Drawing Section  //
 ///////////////////////
 
-function oi() {
-
-}
 
 function startDrawing(e) {
   const startX = e.clientX,
@@ -134,6 +114,84 @@ function submitChatMsg(e) {
   input.value = ""
 }
 
-// socket.on("game - new drawer", id => {
-//
-// })
+
+//////////////////////////////
+//  Socket Event Listeners  //
+//////////////////////////////
+
+// +++++++++++++++ //
+// + Game Events + //
+// +++++++++++++++ //
+
+socket.on("game - start", data => {
+  setTimeout(async () => {
+    game.clearCanvas()
+    game.clearChat()
+
+    if (socket.id == data.currentDrawer.socketId) {
+      canvas.addEventListener("mousedown", startDrawing);
+    } else {
+      canvas.removeEventListener("mousedown", startDrawing);
+    }
+
+    if (socket.id == data.currentDrawer.socketId) {
+      const word = await game.pickWord(data.words);
+
+      socket.emit("game - picked a word", word);
+    }
+  }, 0)
+})
+
+socket.on("game - update timer", percentage => {
+  game.canvContainer.querySelector("#timer").style.width = `${percentage}%`
+})
+
+socket.on("game - round end", data => game.roundEnd(data))
+
+// ++++++++++++++++++ //
+// + Message Events + //
+// ++++++++++++++++++ //
+
+socket.on("message - render", data => game.renderMessage(data))
+
+socket.on("message - clear", () => game.chat.innerHTML = "");
+
+// +++++++++++++++++ //
+// + Canvas Events + //
+// +++++++++++++++++ //
+
+socket.on("canvas - clear", () => {
+  game.ctx.clearRect(0, 0, game.canvas.offsetWidth, game.canvas.offsetHeight);
+})
+
+socket.on("canvas - render", drawing => game.renderDrawing(drawing))
+
+// +++++++++++++++++ //
+// + Player Events + //
+// +++++++++++++++++ //
+
+socket.on("player - update all", players => {
+  game.allPlayers = players;
+  game.onlinePlayers = game.allPlayers;
+
+  // if (this.onlinePlayers.length >= this.minimumPlayers) {
+  //   this.updateGameStartIndicator(true)
+  // } else {
+  //   this.updateGameStartIndicator()
+  // }
+
+  game.updateScoreboard()
+})
+
+socket.on("player - joined/update", data => {
+  game.drawingsAmt = data.drawings.length;
+  game.allPlayers = data.users
+
+  data.drawings.forEach(drawing => {
+    game.renderDrawing(drawing);
+  })
+
+  data.messages.forEach(message => {
+    game.renderMessage(message);
+  })
+})
