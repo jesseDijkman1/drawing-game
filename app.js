@@ -102,6 +102,7 @@ class Game {
     this.players = players
     this.allIds = undefined
     this.drawer = undefined;
+    this.correctWord;
   }
 
   start() {
@@ -116,7 +117,6 @@ class Game {
     for (let i = 0; i < 4; i++) {
 
       const index = Math.floor(Math.random() * this.nouns.length);
-      console.log(this.nouns.length, index)
       collection.push(this.nouns.splice(index, 1))
     }
 
@@ -129,6 +129,13 @@ class Game {
     }
 
     return this.players[this.allIds.shift()]
+  }
+
+  checkGuess(val) {
+    const rx = new RegExp(this.correctWord);
+    return new Promise((resolve, reject) => {
+      resolve(rx.test(val))
+    })
   }
 }
 
@@ -214,7 +221,6 @@ io.on("connection", async socket => {
         game.nouns = await allNouns()
         game.start()
 
-        console.log(game.drawer)
 
         io.emit("game - start", {
           currentDrawer: game.drawer,
@@ -225,7 +231,7 @@ io.on("connection", async socket => {
 
     // Game Functions
     socket.on("game - picked a word", word => {
-      console.log("hello", word)
+      game.correctWord = word;
     })
 
 
@@ -239,12 +245,23 @@ io.on("connection", async socket => {
       socket.broadcast.emit("drawing - render", drawing)
     })
 
-    socket.on("message - create", val => {
+    socket.on("message - create", async val => {
       const msg = new Message(sessionId, val)
 
       messagesMemmory.push(msg);
 
       io.emit("message - render", msg)
+
+      if (game) {
+        const correct = await game.checkGuess(val)
+
+        if (correct) {
+          io.emit("game - round end", {
+            winner: allSessions[sessionId],
+            correctWord: game.correctWord
+          })
+        }
+      }
     })
 
     socket.on("drawing - clear all", () => {
@@ -294,7 +311,6 @@ function allNouns() {
   return new Promise((resolve, reject) => {
     fs.readFile('nounlist.json', (err, data) => {
       if (err) throw err;
-      // console.log(JSON.parse(data))
       resolve(JSON.parse(data));
     })
   })

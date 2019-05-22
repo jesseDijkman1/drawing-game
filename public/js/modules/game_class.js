@@ -32,6 +32,8 @@ export default class {
       this.canvContainer.querySelector("#timer").style.width = `${percentage}%`
     })
 
+    socket.on("game - round end", data => this.roundEnd(data))
+
     socket.on("player - update all", players => {
       this.allPlayers = players;
       this.onlinePlayers = this.allPlayers;
@@ -210,7 +212,7 @@ export default class {
 
       for (let i = 0; i < wordsOptions.length; i++) {
         wordsOptions[i].addEventListener("click", e => {
-          this.canvContainer.removeChild(wordsMenu)
+          this.canvContainer.removeChild(wordsMenu);
           timer.clear()
 
           resolve(e.target.value)
@@ -225,6 +227,38 @@ export default class {
         this.canvContainer.removeChild(wordsMenu)
 
         resolve(words[Math.floor(Math.random() * words.length)])
+      })
+    })
+  }
+
+  async roundEnd(data) {
+    const timer = new Timer(0, 5000, 1000)
+
+    const template = `
+    <section id="round-winner">
+      <h1>^Winner: ${data.winner.name}^</h1>
+      <h2>^Answer: ${data.correctWord}^</h2>
+    </section>
+    `;
+
+    const el = await new Templater(template).parse();
+
+    this.canvContainer.appendChild(el);
+
+    const roundWinner = this.canvContainer.querySelector("#round-winner");
+
+
+    timer.timeout(() => {
+      // Announce the next drawer
+      const timer_2 = new Timer(0, 3000, 1000);
+
+      timer.interval((timeUp, timeDown) => {
+        const template_2 = `
+        <h1>Next drawer<h1>
+        <p>Round starts in ${timeDown / 1000}</p>
+        `;
+
+        roundWinner.innerHTML = template_2;
       })
     })
   }
