@@ -3,7 +3,6 @@
 ///////////////
 //  Modules  //
 ///////////////
-
 const express = require("express"),
       session = require("express-session"),
       socketIO = require("socket.io"),
@@ -11,6 +10,7 @@ const express = require("express"),
       ejs = require("ejs"),
       cookieParser = require("cookie-parser"),
       cookie = require("cookie"),
+      fs = require("fs"),
       bodyParser = require("body-parser");
 
 /////////////////
@@ -25,7 +25,7 @@ let game;
 
 const minimumPlayers = 2;
 
-const activeSessions = {};
+const allSessions = {};
 
 const rooms = [
   {
@@ -50,7 +50,7 @@ const rooms = [
 
 class Message {
   constructor(sessionId, msg) {
-    this.user = activeSessions[sessionId];
+    this.user = allSessions[sessionId];
     this.msg = msg;
     this.time = this.time(new Date());
     this.connected = this.isConnected()
@@ -73,6 +73,8 @@ class Message {
     return `${hours < 10 ? 0 : ""}${hours}:${minutes < 10 ? 0 : ""}${minutes}`
   }
 }
+
+let _allNouns;
 
 class Game {
   constructor(players) {
@@ -123,7 +125,7 @@ app.use(session({
 
 
 app.get("/", (req, res) => {
-  if (req.session.id in activeSessions) {
+  if (req.session.id in allSessions) {
     res.redirect("/room/1")
   } else {
     res.redirect("/create_account")
@@ -133,7 +135,7 @@ app.get("/", (req, res) => {
 app.get("/room/:id", (req, res) => {
   const roomIndex = parseInt(req.params.id)
 
-  if (req.session.id in activeSessions) {
+  if (req.session.id in allSessions) {
     res.render("room.ejs", {roomData: rooms[roomIndex], roomId: roomIndex})
   } else {
     res.redirect("/create_account")
@@ -143,7 +145,7 @@ app.get("/room/:id", (req, res) => {
 app.get("/create_account", (req, res) => {
   const id = req.session.id;
 
-  activeSessions[id] = {
+  allSessions[id] = {
     socketId: undefined,
     name: undefined,
     score: 0
@@ -156,7 +158,7 @@ app.post("/updateAccount", (req, res) => {
   const id = req.session.id;
   const userName = req.body.user_name;
 
-  activeSessions[id].name = userName;
+  allSessions[id].name = userName;
 
   res.redirect("room/1")
 })
@@ -165,21 +167,28 @@ app.post("/updateAccount", (req, res) => {
 //  Sockets  //
 ///////////////
 
+
+
 io.on("connection", async socket => {
   const sessionId = await cookieSession(socket);
 
-  if (sessionId in activeSessions) {
-    activeSessions[sessionId].socketId = socket.id
+  if (sessionId in allSessions) {
+    allSessions[sessionId].socketId = socket.id
 
-    io.emit("player - update all", activeSessions)
+    io.emit("player - update all", allSessions)
 
     if (onlineSesssionsAmt() >= minimumPlayers) {
-      game = new Game(activeSessions);
+      game = new Game(allSessions);
+      game.nouns = await allNouns()
       game.start()
 
+      socket.emit("game - new drawer", socket.id)
+
       let counter = 0;
+
       const max = 10000;
       const i = 1000;
+
       const timer = setInterval(() => {
         if (counter >= max) {
           clearInterval(timer)
@@ -221,20 +230,14 @@ io.on("connection", async socket => {
 
     socket.on("message - clear all", () => {
       messagesMemmory = [];
+
+      io.emit("message - clear")
     })
 
     socket.on("disconnect", () => {
-      activeSessions[sessionId].socketId = undefined;
+      allSessions[sessionId].socketId = undefined;
 
-      if (onlineSesssionsAmt() < minimumPlayers) {
-        if (game) {
-          game.stop()
-        }
-
-        io.emit("game - stop")
-      }
-
-      io.emit("player - update all", activeSessions)
+      io.emit("player - update all", allSessions)
     })
   } else {
     console.log("player unknown")
@@ -255,9 +258,19 @@ function cookieSession(socket) {
 function onlineSesssionsAmt() {
   let temp = 0;
 
-  for (let s in activeSessions) {
-    if (activeSessions[s].socketId) temp++
+  for (let s in allSessions) {
+    if (allSessions[s].socketId) temp++
   }
 
   return temp
+}
+
+function allNouns() {
+  return new Promise((resolve, reject) => {
+    fs.readFile('nounlist.json', (err, data) => {
+      if (err) throw err;
+      // console.log(JSON.parse(data))
+      resolve(JSON.parse(data));
+    })
+  })
 }

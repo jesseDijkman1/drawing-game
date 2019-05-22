@@ -30,15 +30,12 @@ void function iife() {
     allSliders[i].addEventListener("mousedown", startSliding)
   }
 
-  canvas.addEventListener("mousedown", startDrawing)
+
 
   chatForm.addEventListener("submit", submitChatMsg)
 
-
-
   canvasClear.addEventListener("click", () => {
     game.clearCanvas()
-    // game.broadcastClearCanvas()
   })
 
   new PenPreview(penPreview, penColor, penSize)
@@ -55,6 +52,10 @@ socket.on("game - start", currentDrawer => {
 ///////////////////////
 //  Drawing Section  //
 ///////////////////////
+
+function oi() {
+
+}
 
 function startDrawing(e) {
   const startX = e.clientX,
@@ -122,3 +123,9 @@ function submitChatMsg(e) {
 
   input.value = ""
 }
+
+socket.on("game - new drawer", id => {
+  if (socket.id == id) {
+    canvas.addEventListener("mousedown", startDrawing)
+  }
+})

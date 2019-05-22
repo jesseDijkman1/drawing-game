@@ -21,6 +21,10 @@ export default class {
       this.ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
     })
 
+    socket.on("message - clear", () => {
+      this.chat.innerHTML = "";
+    })
+
     socket.on("drawing - render", drawing => this.renderDrawing(drawing))
 
     socket.on("game - update timer", percentage => {
@@ -174,9 +178,7 @@ export default class {
   }
 
   broadcastDrawing(drawing) {
-    if (socket.id == this.currentDrawerId || this.currentDrawerId == undefined) {
-      socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
-    }
+    socket.emit("drawing - save/broadcast", drawing, this.drawingsAmt)
   }
 
   clearCanvas() {
@@ -185,14 +187,6 @@ export default class {
 
   clearChat() {
     socket.emit("message - clear all")
-    this.chat.innerHTML = "";
   }
 
-  broadcastClearCanvas() {
-
-  }
-
-  isCurrentDrawer(obj) {
-    // console.log("cunt", obj)
-  }
 }
