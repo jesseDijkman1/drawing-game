@@ -30,7 +30,7 @@ void function iife() {
     allSliders[i].addEventListener("mousedown", startSliding)
   }
 
-
+  canvas.addEventListener("mousedown", startDrawing)
 
   chatForm.addEventListener("submit", submitChatMsg)
 
@@ -124,8 +124,8 @@ function submitChatMsg(e) {
   input.value = ""
 }
 
-socket.on("game - new drawer", id => {
-  if (socket.id == id) {
-    canvas.addEventListener("mousedown", startDrawing)
-  }
-})
+// socket.on("game - new drawer", id => {
+//   if (socket.id == id) {
+//     canvas.addEventListener("mousedown", startDrawing)
+//   }
+// })

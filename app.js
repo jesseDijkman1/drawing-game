@@ -17,7 +17,7 @@ const express = require("express"),
 //  Constants  //
 /////////////////
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 let drawingsMemory = [];
 let messagesMemmory = [];
