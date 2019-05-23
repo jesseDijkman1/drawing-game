@@ -197,8 +197,8 @@ export default class {
         const pickedWord = new Templater(templates.pickedWord(randomWord)).parse();
 
         this.canvContainer.appendChild(pickedWord)
-
-        timer.timeout(() => resolve(randomWord))
+        resolve(randomWord)
+        // timer.timeout(() => resolve(randomWord))
       })
     })
   }

@@ -280,17 +280,7 @@ button, input {
   border-radius: .2em;
 }
 
-@keyframes pop {
-  0% {
-    transform: scale(1)
-  }
-  50% {
-    transform: scale(1.5)
-  }
-  100% {
-    transform: scale(1)
-  }
-}
+
 
 .account-name-form {
   max-width: 400px;
@@ -402,6 +392,13 @@ button, input {
 
 .words-menu::after {
   content: attr(data-time);
+  text-align: center;
+  font-size: 3em;
+  width: 1.5em;
+  line-height: 1.5em;
+  background: #292929;
+  color: var(--color-green-light);
+  border-radius: 100px;
 }
 
 .words-menu button {
@@ -431,10 +428,38 @@ button, input {
   left: 0;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .word-reminder {
   position: absolute;
   top: 0;
   left:0;
+  color: rgba(0,0,0,.8)
+}
+
+.pop-up h1 {
+  text-align: center;
+  font-size: 3em;
+  width: 1.5em;
+  line-height: 1.5em;
+  background: #292929;
+  color: var(--color-green-light);
+  border-radius: 100px;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1)
+  }
+  50% {
+    transform: scale(1.5)
+  }
+  100% {
+    transform: scale(1)
+  }
 }

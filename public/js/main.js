@@ -116,7 +116,6 @@ function submitChatMsg(e) {
   input.value = ""
 }
 
-
 //////////////////////////////
 //  Socket Event Listeners  //
 //////////////////////////////
@@ -125,19 +124,9 @@ function submitChatMsg(e) {
 // + Game Events + //
 // +++++++++++++++ //
 
-
-socket.on("game - start", async data => {
-    if (socket.id == data.currentDrawer.socketId) {
-      game.drawerUI()
-    } else {
-      // The current Client isn't the current drawer
-      // canvas.removeEventListener("mousedown", startDrawing);
-      game.spectatorUI()
-    }
-})
-
 socket.on("game - new round", async data => {
   game.reset()
+
   chatForm.addEventListener("submit", submitChatMsg)
 
   if (data.currentDrawer.socketId == socket.id) {
@@ -145,7 +134,11 @@ socket.on("game - new round", async data => {
 
     const word = await game.pickWord(data.words);
 
+    game.drawerUI()
+
     socket.emit("game - picked a word", word);
+  } else {
+    game.spectatorUI()
   }
 })
 

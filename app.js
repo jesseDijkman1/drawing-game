@@ -17,7 +17,11 @@ const express = require("express"),
       cookieParser = require("cookie-parser"),
       cookie = require("cookie"),
       fs = require("fs"),
-      bodyParser = require("body-parser");
+      bodyParser = require("body-parser"),
+      request = require("request");
+
+require("dotenv").config()
+
 
 /////////////////
 //  Constants  //
@@ -25,7 +29,6 @@ const express = require("express"),
 
 const port = process.env.PORT || 5000;
 
-// let drawingsMemory = [];
 let messagesMemmory = [];
 
 let game = undefined;
@@ -92,11 +95,10 @@ class Game {
     this.correctWord;
   }
 
-
   endRound(winner = false) {
 
     if (!winner) {
-      this.drawer.score -= 3
+      this.drawer.score--
     } else {
       this.drawer.score += 3;
       winner.score += 3;
@@ -350,7 +352,7 @@ function onlineSesssionsAmt() {
 
 function allNouns() {
   return new Promise((resolve, reject) => {
-    fs.readFile('nounlist.json', (err, data) => {
+    fs.readFile("nounlist.json", (err, data) => {
       if (err) throw err;
       resolve(JSON.parse(data));
     })
