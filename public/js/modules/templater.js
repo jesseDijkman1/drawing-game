@@ -4,7 +4,8 @@ export default class {
   }
 
   parse() {
-    return new Promise((resolve, reject) => {
+    let returnValue = undefined;
+    // return new Promise((resolve, reject) => {
       // const rx = /(?:\<(\/)?(\w+)\>|\^(.+)\^)/g,
       const rx = /(?:\<(\/)?(\w+)(?:\s(.+?))?\>|\^(.+)\^)/g,
             memory = [];
@@ -31,12 +32,14 @@ export default class {
             const done = memory.pop()
             memory[memory.length - 1].appendChild(done)
           } else {
-            resolve(memory.pop())
+            returnValue = memory.pop()
           }
         } else if (text) {
           memory[memory.length - 1].appendChild(document.createTextNode(text))
         }
       }
-    })
+
+      return returnValue;
+    // })
   }
 }

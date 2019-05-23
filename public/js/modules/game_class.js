@@ -1,6 +1,7 @@
 import socket from "./socketIO.js";
 import Templater from "./templater.js";
 import Timer from "./timer_class.js";
+import * as templates from "./templates.js"
 
 const _onlineClients = [];
 
@@ -50,7 +51,7 @@ export default class {
         <h1>^${this.onlinePlayers.length}/${this.minimumPlayers}^</h1>
       </div>`;
 
-      const el = await new Templater(template).parse();
+      const el = new Templater(template).parse();
 
       try {
         const waiter = this.canvContainer.querySelector("#game-waiter")
@@ -90,7 +91,7 @@ export default class {
       </table>
       `;
 
-    const el = await new Templater(scoreboardTemplate).parse();
+    const el = new Templater(scoreboardTemplate).parse();
 
     try {
       const scoreboard = this.scoreboard.querySelector("table")
@@ -130,7 +131,7 @@ export default class {
       </div>
     </${this.chat.nodeName == "UL" ? "li" : "div"}>`;
 
-    const msgEl = await new Templater(template).parse();
+    const msgEl = new Templater(template).parse();
 
     this.chat.appendChild(msgEl)
   }
@@ -149,73 +150,138 @@ export default class {
 
   async pickWord(words) {
     const template = `
-    <section class="words-menu" data-time="5">
+    <section class="words-menu">
       <button type="button" value="${words[0]}">^${words[0]}^</button>
       <button type="button" value="${words[1]}">^${words[1]}^</button>
       <button type="button" value="${words[2]}">^${words[2]}^</button>
       <button type="button" value="${words[3]}">^${words[3]}^</button>
     </section>`;
 
-    const wordsMenu = await new Templater(template).parse();
+    const wordsMenu = new Templater(template).parse();
 
     this.canvContainer.appendChild(wordsMenu);
 
     const wordsOptions = this.canvContainer.querySelectorAll(".words-menu button")
 
     return new Promise((resolve, reject) => {
-      const timer = new Timer(0, 5000, 1000)
+      const timer = new Timer(0, 3000, 1000, true);
+      const timer_2 = new Timer(0, 5000, 1000, true);
 
       for (let i = 0; i < wordsOptions.length; i++) {
-        wordsOptions[i].addEventListener("click", e => {
+        wordsOptions[i].addEventListener("click", async e => {
           this.canvContainer.removeChild(wordsMenu);
-          timer.clear()
+          timer_2.clear()
 
-          resolve(e.target.value)
+          const pickedWord = new Templater(templates.pickedWord(e.target.value)).parse();
+
+          this.gamePopUp(pickedWord)
+
+          timer.timeout(() => {
+            timer.interval((timeUp, timeDown) => {
+              const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+
+              this.gamePopUp(counter, true)
+            })
+
+            timer.timeout(() => {
+              this.canvContainer.querySelector(".pop-up").remove()
+              resolve(e.target.value)
+            })
+          })
         })
       }
 
-      timer.interval((timeUp, timeDown) => {
-        wordsMenu.setAttribute("data-time", timeDown / 1000)
+      timer_2.interval((timeUp, timeDown) => {
+        console.log(timeUp, timeDown)
+        wordsMenu.setAttribute("data-time", timeDown / 1000);
+        // const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+
+        // this.gamePopUp(counter, true)
       })
 
-      timer.timeout(() => {
+      timer_2.timeout(() => {
+        const randomWord = words[Math.floor(Math.random() * words.length)]
+        // resolve()
         this.canvContainer.removeChild(wordsMenu)
+        // this.canvContainer.querySelector(".pop-up").remove()
 
-        resolve(words[Math.floor(Math.random() * words.length)])
+        const pickedWord = new Templater(templates.pickedWord(randomWord)).parse();
+
+        this.gamePopUp(pickedWord)
+
+        timer.timeout(() => {
+          timer.interval((timeUp, timeDown) => {
+            const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+
+            this.gamePopUp(counter, true)
+          })
+
+          timer.timeout(() => {
+            this.canvContainer.querySelector(".pop-up").remove()
+
+            resolve(randomWord)
+          })
+        })
       })
+      //
+      // timer.timeout(() => {
+      //   this.canvContainer.removeChild(wordsMenu)
+      //
+      //   resolve(words[Math.floor(Math.random() * words.length)])
+      // })
     })
   }
 
   async roundEnd(data) {
-    const timer = new Timer(0, 5000, 1000)
+    // const timer = new Timer(0, 5000, 1000)
+    //
+    // const template = `
+    // <section id="round-winner">
+    //   <h1>^Winner: ${data.winner.name}^</h1>
+    //   <h2>^Answer: ${data.correctWord}^</h2>
+    // </section>
+    // `;
+    //
+    // const el = await new Templater(template).parse();
+    //
+    // this.canvContainer.appendChild(el);
+    //
+    // const roundWinner = this.canvContainer.querySelector("#round-winner");
+    //
+    //
+    // timer.timeout(() => {
+    //   // Announce the next drawer
+    //   const timer_2 = new Timer(0, 3000, 1000);
+    //
+    //   timer.interval((timeUp, timeDown) => {
+    //     const template_2 = `
+    //     <h1>Next drawer<h1>
+    //     <p>Round starts in ${timeDown / 1000}</p>
+    //     `;
+    //
+    //     roundWinner.innerHTML = template_2;
+    //   })
+    // })
+  }
 
-    const template = `
-    <section id="round-winner">
-      <h1>^Winner: ${data.winner.name}^</h1>
-      <h2>^Answer: ${data.correctWord}^</h2>
-    </section>
-    `;
+  async gamePopUp(content, replace = undefined) {
+    const el = this.canvContainer.querySelector(".pop-up") || new Templater(templates.popUp()).parse()
 
-    const el = await new Templater(template).parse();
+    console.log(content)
 
-    this.canvContainer.appendChild(el);
+    if (replace) {
+      if (this.canvContainer.querySelector(".pop-up")) {
+        el.innerHTML = "";
+        el.appendChild(content)
+      } else {
+        el.appendChild(content)
+        this.canvContainer.appendChild(el)
+      }
+    } else {
+      el.appendChild(content);
 
-    const roundWinner = this.canvContainer.querySelector("#round-winner");
-
-
-    timer.timeout(() => {
-      // Announce the next drawer
-      const timer_2 = new Timer(0, 3000, 1000);
-
-      timer.interval((timeUp, timeDown) => {
-        const template_2 = `
-        <h1>Next drawer<h1>
-        <p>Round starts in ${timeDown / 1000}</p>
-        `;
-
-        roundWinner.innerHTML = template_2;
-      })
-    })
+      this.canvContainer.appendChild(el);
+    }
   }
 
   drawerUI() {
