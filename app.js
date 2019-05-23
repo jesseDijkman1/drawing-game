@@ -1,17 +1,5 @@
 "use strict";
 
-/////////////////
-//  Constants  //
-/////////////////
-
-const ROUND_LENGTH = 2000;
-const API_PARAMS = {
-  "user-id": process.env.USER_ID,
-  "api-key": process.env.API_KEY,
-  "censor-character": "*"
-};
-
-
 ///////////////
 //  Modules  //
 ///////////////
@@ -28,6 +16,16 @@ const express = require("express"),
 
 require("dotenv").config()
 
+/////////////////
+//  Constants  //
+/////////////////
+
+const ROUND_LENGTH = 2000;
+const API_PARAMS = {
+  "user-id": process.env.USER_ID,
+  "api-key": process.env.API_KEY,
+  "censor-character": "*"
+};
 
 /////////////////
 //  Constants  //
@@ -119,10 +117,6 @@ class Game {
       })
     })
   }
-
-  // newRound() {
-  //   this.drawer = this.newDrawer();
-  // }
 
   randomWords() {
     const collection = [];
@@ -301,6 +295,8 @@ io.on("connection", async socket => {
     socket.on("message - create", async val => {
       const msg = new Message(sessionId, val)
 
+      msg.msg = await profanityFilter(msg.msg)
+
       messagesMemmory.push(msg);
 
       io.emit("message - render", msg)
@@ -362,5 +358,19 @@ function allNouns() {
       if (err) throw err;
       resolve(JSON.parse(data));
     })
+  })
+}
+
+function profanityFilter(string) {
+  const params = {...API_PARAMS, "content": string}
+
+  return new Promise((resolve, reject) => {
+    request.post("https://neutrinoapi.com/bad-word-filter?", {form: params}, (err, res, body) => {
+      if (!err && res.statusCode == 200) {
+        resolve(JSON.parse(body)["censored-content"]);
+      } else {
+        reject("")
+      }
+    });
   })
 }
