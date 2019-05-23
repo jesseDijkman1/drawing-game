@@ -101,7 +101,9 @@ class Game {
     let counter = 0;
     this.timer = setInterval(() => {
       if (counter >= max) {
-        clearInterval(this.timer)
+        this.endRound()
+
+        return cb(false)
       } else {
         counter++
         return cb(counter)
@@ -109,7 +111,9 @@ class Game {
     }, 1)
   }
 
-  endRound(winner) {
+  endRound(winner = undefined) {
+    clearInterval(this.timer)
+
     return new Promise((resolve, reject) => {
       resolve({
         drawer: this.drawer,
@@ -241,11 +245,18 @@ io.on("connection", async socket => {
     socket.on("game - picked a word", word => {
       game.correctWord = word;
 
-      game.beginRound(ROUND_LENGTH, time => {
-        io.emit("game - round timer", {time: time, percentage: (time/ROUND_LENGTH) * 100})
-      })
+      io.emit("game - round start")
     })
 
+    socket.on("game - round start", () => {
+      game.beginRound(ROUND_LENGTH, time => {
+        if (time) {
+          io.emit("game - round timer", {time: time, percentage: (time/ROUND_LENGTH) * 100})
+        } else {
+          io.emit("game - round end")
+        }
+      })
+    })
 
     socket.emit("player - joined/update", {drawings: !game ? [] : game.drawings, messages: messagesMemmory})
 

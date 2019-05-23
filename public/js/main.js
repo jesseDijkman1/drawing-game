@@ -144,6 +144,13 @@ socket.on("game - start", data => {
 
       socket.emit("game - picked a word", word);
     }
+
+    socket.on("game - round start", async () => {
+      const countDown = await game.roundStartCounter()
+
+      socket.emit("game - round start")
+    })
+
   }, 0)
 })
 

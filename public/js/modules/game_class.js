@@ -176,18 +176,21 @@ export default class {
 
           this.gamePopUp(pickedWord)
 
-          timer.timeout(() => {
-            timer.interval((timeUp, timeDown) => {
-              const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+          resolve(e.target.value)
 
-              this.gamePopUp(counter, true)
-            })
 
-            timer.timeout(() => {
-              this.canvContainer.querySelector(".pop-up").remove()
-              resolve(e.target.value)
-            })
-          })
+          // timer.timeout(() => {
+          //   timer.interval((timeUp, timeDown) => {
+          //     const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+          //
+          //     this.gamePopUp(counter, true)
+          //   })
+          //
+          //   timer.timeout(() => {
+          //     this.canvContainer.querySelector(".pop-up").remove()
+          //     resolve(e.target.value)
+          //   })
+          // })
         })
       }
 
@@ -204,27 +207,45 @@ export default class {
 
         this.gamePopUp(pickedWord)
 
-        timer.timeout(() => {
-          timer.interval((timeUp, timeDown) => {
-            const counter = new Templater(templates.counter(timeDown / 1000)).parse()
-
-            this.gamePopUp(counter, true)
-          })
-
-          timer.timeout(() => {
-            this.canvContainer.querySelector(".pop-up").remove()
-
-            resolve(randomWord)
-          })
-        })
+        timer.timeout(() => resolve(randomWord))
+        // resolve(randomWord)
+        // timer.timeout(() => {
+        //   timer.interval((timeUp, timeDown) => {
+        //     const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+        //
+        //     this.gamePopUp(counter, true)
+        //   })
+        //
+        //   timer.timeout(() => {
+        //     this.canvContainer.querySelector(".pop-up").remove()
+        //
+        //     resolve(randomWord)
+        //   })
+        // })
       })
     })
   }
 
-  async roundTimer(data) {
+  roundStartCounter() {
+    const timer = new Timer(0, 3000, 1000, true);
+
+    return new Promise((resolve, reject) => {
+      timer.interval((timeUp, timeDown) => {
+        const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+
+        this.gamePopUp(counter, true)
+      })
+
+      timer.timeout(() => resolve())
+    })
+  }
+
+  roundTimer(data) {
     const timerEl = this.canvContainer.querySelector("#timer")
     timerEl.style.width = `${100 - data.percentage}%`
   }
+
+
 
   async gamePopUp(content, replace = undefined) {
     const el = this.canvContainer.querySelector(".pop-up") || new Templater(templates.popUp()).parse()
