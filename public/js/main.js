@@ -130,24 +130,26 @@ socket.on("game - start", data => {
     game.clearChat()
 
     if (socket.id == data.currentDrawer.socketId) {
-      canvas.addEventListener("mousedown", startDrawing);
       game.drawerUI()
     } else {
       // The current Client isn't the current drawer
       canvas.removeEventListener("mousedown", startDrawing);
       game.spectatorUI()
-
     }
 
     if (socket.id == data.currentDrawer.socketId) {
       const word = await game.pickWord(data.words);
 
       socket.emit("game - picked a word", word);
+
     }
 
     socket.on("game - round start", async () => {
       const countDown = await game.roundStartCounter()
 
+      if (socket.id == data.currentDrawer.socketId) {
+        canvas.addEventListener("mousedown", startDrawing);
+      }
       socket.emit("game - round start")
     })
 
@@ -158,7 +160,15 @@ socket.on("game - round timer", data => {
   game.roundTimer(data)
 })
 
-socket.on("game - round end", data => game.roundEnd(data))
+
+
+
+socket.on("game - round end", data => {
+  console.log(data)
+  // game.roundEnd(data)
+
+
+})
 
 // ++++++++++++++++++ //
 // + Message Events + //

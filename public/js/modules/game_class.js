@@ -174,23 +174,7 @@ export default class {
 
           const pickedWord = new Templater(templates.pickedWord(e.target.value)).parse();
 
-          this.gamePopUp(pickedWord)
-
           resolve(e.target.value)
-
-
-          // timer.timeout(() => {
-          //   timer.interval((timeUp, timeDown) => {
-          //     const counter = new Templater(templates.counter(timeDown / 1000)).parse()
-          //
-          //     this.gamePopUp(counter, true)
-          //   })
-          //
-          //   timer.timeout(() => {
-          //     this.canvContainer.querySelector(".pop-up").remove()
-          //     resolve(e.target.value)
-          //   })
-          // })
         })
       }
 
@@ -208,36 +192,30 @@ export default class {
         this.gamePopUp(pickedWord)
 
         timer.timeout(() => resolve(randomWord))
-        // resolve(randomWord)
-        // timer.timeout(() => {
-        //   timer.interval((timeUp, timeDown) => {
-        //     const counter = new Templater(templates.counter(timeDown / 1000)).parse()
-        //
-        //     this.gamePopUp(counter, true)
-        //   })
-        //
-        //   timer.timeout(() => {
-        //     this.canvContainer.querySelector(".pop-up").remove()
-        //
-        //     resolve(randomWord)
-        //   })
-        // })
       })
     })
   }
 
-  roundStartCounter() {
-    const timer = new Timer(0, 3000, 1000, true);
+  roundStartCounter(externalTime = undefined) {
+    if (!externalTime) {
+      const timer = new Timer(0, 3000, 1000, true);
 
-    return new Promise((resolve, reject) => {
-      timer.interval((timeUp, timeDown) => {
-        const counter = new Templater(templates.counter(timeDown / 1000)).parse()
+      return new Promise((resolve, reject) => {
+        timer.interval((timeUp, timeDown) => {
+          const counter = new Templater(templates.counter(timeDown / 1000)).parse()
 
-        this.gamePopUp(counter, true)
+          this.gamePopUp(counter, true)
+        })
+
+        timer.timeout(() => {
+          this.canvContainer.querySelector(".pop-up").remove()
+          resolve()
+        })
       })
-
-      timer.timeout(() => resolve())
-    })
+    } else {
+      const counter = new Templater(templates.counter(externalTime / 1000)).parse()
+      this.gamePopUp(counter, true)
+    }
   }
 
   roundTimer(data) {
@@ -245,12 +223,14 @@ export default class {
     timerEl.style.width = `${100 - data.percentage}%`
   }
 
+  roundEnd(data) {
+    console.log(data)
+  }
+
 
 
   async gamePopUp(content, replace = undefined) {
     const el = this.canvContainer.querySelector(".pop-up") || new Templater(templates.popUp()).parse()
-
-    console.log(content)
 
     if (replace) {
       if (this.canvContainer.querySelector(".pop-up")) {

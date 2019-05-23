@@ -4,7 +4,7 @@
 //  Constants  //
 /////////////////
 
-const ROUND_LENGTH = 5000;
+const ROUND_LENGTH = 2000;
 
 ///////////////
 //  Modules  //
@@ -89,7 +89,6 @@ class Game {
     this.allIds = undefined
     this.drawer = undefined;
     this.correctWord;
-    this.timer;
   }
 
   startGame() {
@@ -97,23 +96,7 @@ class Game {
     this.drawer = this.newDrawer();
   }
 
-  beginRound(max, cb) {
-    let counter = 0;
-    this.timer = setInterval(() => {
-      if (counter >= max) {
-        this.endRound()
-
-        return cb(false)
-      } else {
-        counter++
-        return cb(counter)
-      }
-    }, 1)
-  }
-
-  endRound(winner = undefined) {
-    clearInterval(this.timer)
-
+  endRound(winner = "no one") {
     return new Promise((resolve, reject) => {
       resolve({
         drawer: this.drawer,
@@ -249,13 +232,35 @@ io.on("connection", async socket => {
     })
 
     socket.on("game - round start", () => {
-      game.beginRound(ROUND_LENGTH, time => {
-        if (time) {
-          io.emit("game - round timer", {time: time, percentage: (time/ROUND_LENGTH) * 100})
+      let counter = 0;
+
+      const timer = setInterval(async () => {
+        if (counter >= ROUND_LENGTH) {
+          clearInterval(timer)
+          console.log("timer_1 ender")
+          counter = 0;
+
+          const roundData = await game.endRound();
+
+          socket.emit("game - round end", roundData)
+
+          // const timer_2 = setInterval(() => {
+          //   if (counter >= 5000) {
+          //     clearInterval(timer_2)
+          //   } else {
+          //     counter += 1000;
+          //     socket.emit("game - round restart counter", 5000 - counter)
+          //   }
+          //   console.log("")
+          // }, 1000)
+
         } else {
-          io.emit("game - round end")
+          counter++
+          socket.emit("game - round timer", {time: counter, percentage: (counter/ROUND_LENGTH) * 100})
         }
-      })
+      }, 1)
+
+
     })
 
     socket.emit("player - joined/update", {drawings: !game ? [] : game.drawings, messages: messagesMemmory})
