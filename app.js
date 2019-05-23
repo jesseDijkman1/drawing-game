@@ -19,7 +19,7 @@ const express = require("express"),
 
 const port = process.env.PORT || 5000;
 
-let drawingsMemory = [];
+// let drawingsMemory = [];
 let messagesMemmory = [];
 let game = undefined;
 
@@ -99,16 +99,27 @@ class Timer {
 
 class Game {
   constructor(players) {
-    this.players = players
+    this.players = players;
+    this.drawings = [];
     this.allIds = undefined
     this.drawer = undefined;
     this.correctWord;
   }
 
-  start() {
+  startGame() {
     this.allIds = Object.keys(this.players);
     this.drawer = this.newDrawer();
 
+  }
+
+  endRound(winner) {
+    return new Promise((resolve, reject) => {
+      resolve({
+        drawer: this.drawer,
+        winner: winner,
+        correctWord: this.correctWord
+      })
+    })
   }
 
   randomWords() {
@@ -219,7 +230,7 @@ io.on("connection", async socket => {
       if (onlineSesssionsAmt() >= minimumPlayers) {
         game = new Game(allSessions);
         game.nouns = await allNouns()
-        game.start()
+        game.startGame()
 
 
         io.emit("game - start", {
@@ -235,12 +246,13 @@ io.on("connection", async socket => {
     })
 
 
-    socket.emit("player - joined/update", {drawings: drawingsMemory, messages: messagesMemmory})
+    socket.emit("player - joined/update", {drawings: !game ? [] : game.drawings, messages: messagesMemmory})
 
     socket.broadcast.emit("player - joined", socket.id)
 
     socket.on("canvas - save/broadcast", (drawing, id) => {
-      drawingsMemory[id] = drawing;
+      // drawingsMemory[id] = drawing;
+      game.drawings[id] = drawing;
 
       socket.broadcast.emit("canvas - render", drawing)
     })
@@ -256,16 +268,16 @@ io.on("connection", async socket => {
         const correct = await game.checkGuess(val)
 
         if (correct) {
-          io.emit("game - round end", {
-            winner: allSessions[sessionId],
-            correctWord: game.correctWord
-          })
+          // End the round and return data about winner, drawer
+          const roundData = await game.endRound(allSessions[sessionId]);
+
+          io.emit("game - round end", roundData);
         }
       }
     })
 
     socket.on("canvas - clear all", () => {
-      drawingsMemory = [];
+      game.drawings = [];
 
       io.emit("canvas - clear")
     })

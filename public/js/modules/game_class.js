@@ -217,4 +217,14 @@ export default class {
       })
     })
   }
+
+  drawerUI() {
+    const penOptions = this.canvContainer.querySelector(".canvas-options");
+    penOptions.style.display = "flex";
+  }
+
+  spectatorUI() {
+    const penOptions = this.canvContainer.querySelector(".canvas-options");
+    penOptions.style.display = "none";
+  }
 }

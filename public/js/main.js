@@ -9,6 +9,7 @@ const canvContainer = document.querySelector("#room-content .canvas-container");
 const canvas = document.getElementById("main-canvas");
 const chat = document.querySelector("#game-extras .chat-container .chat-messages");
 const scoreboard = document.querySelector("#game-extras .scoreboard-container");
+const canvasOptions = document.querySelector(".canvas-options");
 
 const penPreview = document.querySelector("#pen-preview div");
 const allSliders = document.querySelectorAll(".option input[type=range]");
@@ -130,8 +131,12 @@ socket.on("game - start", data => {
 
     if (socket.id == data.currentDrawer.socketId) {
       canvas.addEventListener("mousedown", startDrawing);
+      game.drawerUI()
     } else {
+      // The current Client isn't the current drawer
       canvas.removeEventListener("mousedown", startDrawing);
+      game.spectatorUI()
+
     }
 
     if (socket.id == data.currentDrawer.socketId) {
@@ -174,11 +179,11 @@ socket.on("player - update all", players => {
   game.allPlayers = players;
   game.onlinePlayers = game.allPlayers;
 
-  // if (this.onlinePlayers.length >= this.minimumPlayers) {
-  //   this.updateGameStartIndicator(true)
-  // } else {
-  //   this.updateGameStartIndicator()
-  // }
+  if (game.onlinePlayers.length >= game.minimumPlayers) {
+    game.updateGameStartIndicator(true)
+  } else {
+    game.updateGameStartIndicator()
+  }
 
   game.updateScoreboard()
 })
