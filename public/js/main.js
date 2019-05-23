@@ -42,8 +42,6 @@ void function iife() {
 }()
 
 
-
-
 ///////////////////////
 //  Drawing Section  //
 ///////////////////////
@@ -143,7 +141,8 @@ socket.on("game - new round", async data => {
 })
 
 socket.on("game - round start", async data => {
-  // console.log("round start", data, socket.id)
+  game.reset()
+
   await game.roundStartCounter()
 
   if (socket.id == data.socketId) {

@@ -20,7 +20,7 @@ require("dotenv").config()
 //  Constants  //
 /////////////////
 
-const ROUND_LENGTH = 2000;
+const ROUND_LENGTH = 20000;
 const API_PARAMS = {
   "user-id": process.env.USER_ID,
   "api-key": process.env.API_KEY,
