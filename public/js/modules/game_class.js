@@ -45,12 +45,15 @@ export default class {
     const cWidth = this.canvas.getAttribute("width")
     const cHeight = this.canvas.getAttribute("height")
 
-
     this.ctx.clearRect(0, 0, cWidth, cHeight);
 
     this.chat.innerHTML = "";
 
-    this.canvContainer.querySelector("#timer").style.width = "100%"
+    this.canvContainer.querySelector("#timer").style.width = "100%";
+
+    if (this.canvContainer.querySelector(".word-reminder")) {
+      this.canvContainer.querySelector(".word-reminder").remove()
+    }
   }
 
 
@@ -176,6 +179,8 @@ export default class {
 
           const pickedWord = new Templater(templates.pickedWord(e.target.value)).parse();
 
+          this.canvContainer.appendChild(pickedWord)
+
           resolve(e.target.value)
         })
       }
@@ -191,7 +196,7 @@ export default class {
 
         const pickedWord = new Templater(templates.pickedWord(randomWord)).parse();
 
-        this.gamePopUp(pickedWord)
+        this.canvContainer.appendChild(pickedWord)
 
         timer.timeout(() => resolve(randomWord))
       })

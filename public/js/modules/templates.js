@@ -1,5 +1,5 @@
 export function pickedWord(word) {
-  return `<h2>^Your word is: ${word}^</h2>`;
+  return `<h2 class="word-reminder">^Your word is: ${word}^</h2>`;
 }
 
 export function nextDrawer(name) {
