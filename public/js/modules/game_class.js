@@ -45,9 +45,12 @@ export default class {
     const cWidth = this.canvas.getAttribute("width")
     const cHeight = this.canvas.getAttribute("height")
 
+
     this.ctx.clearRect(0, 0, cWidth, cHeight);
 
     this.chat.innerHTML = "";
+
+    this.canvContainer.querySelector("#timer").style.width = "100%"
   }
 
 

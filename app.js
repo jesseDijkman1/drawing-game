@@ -92,16 +92,22 @@ class Game {
     this.correctWord;
   }
 
-  // startGame() {
-  //   this.drawer = this.newDrawer();
-  // }
 
-  endRound(winner = "no one") {
+  endRound(winner = false) {
+
+    if (!winner) {
+      this.drawer.score -= 3
+    } else {
+      this.drawer.score += 3;
+      winner.score += 3;
+    }
+
     return new Promise((resolve, reject) => {
       resolve({
         drawer: this.drawer,
         winner: winner,
         correctWord: this.correctWord,
+        users: this.players
       })
     })
   }
@@ -293,7 +299,6 @@ io.on("connection", async socket => {
 
       if (game) {
         const correct = await game.checkGuess(val)
-        console.log(correct)
 
         if (correct) {
           clearInterval(game.timer)

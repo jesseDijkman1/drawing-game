@@ -165,15 +165,15 @@ socket.on("game - round timer", data => {
 })
 
 socket.on("game - round end", data => {
+  game.allPlayers = data.users;
+  game.updateScoreboard()
+
   if (socket.id == data.drawer.socketId) {
-    console.log("round end", data.drawer.socketId, socket.id)
     socket.emit("game - new round")
 
     canvas.removeEventListener("mousedown", startDrawing)
   }
 })
-
-
 
 // ++++++++++++++++++ //
 // + Message Events + //
