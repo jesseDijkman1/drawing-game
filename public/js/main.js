@@ -31,6 +31,7 @@ void function iife() {
     allSliders[i].addEventListener("mousedown", startSliding)
   }
 
+  chatForm.addEventListener("submit", e => e.preventDefault())
   chatForm.addEventListener("submit", submitChatMsg)
 
   canvasClear.addEventListener("click", () => {
@@ -124,59 +125,61 @@ function submitChatMsg(e) {
 // + Game Events + //
 // +++++++++++++++ //
 
-socket.on("game - start", data => {
-  setTimeout(async () => {
-    game.clearCanvas()
-    game.clearChat()
 
+socket.on("game - start", async data => {
     if (socket.id == data.currentDrawer.socketId) {
       game.drawerUI()
     } else {
       // The current Client isn't the current drawer
-      canvas.removeEventListener("mousedown", startDrawing);
+      // canvas.removeEventListener("mousedown", startDrawing);
       game.spectatorUI()
     }
+})
 
-    if (socket.id == data.currentDrawer.socketId) {
-      const word = await game.pickWord(data.words);
+socket.on("game - new round", async data => {
+  game.reset()
+  chatForm.addEventListener("submit", submitChatMsg)
 
-      socket.emit("game - picked a word", word);
+  if (data.currentDrawer.socketId == socket.id) {
+    chatForm.removeEventListener("submit", submitChatMsg)
 
-    }
+    const word = await game.pickWord(data.words);
 
-    socket.on("game - round start", async () => {
-      const countDown = await game.roundStartCounter()
+    socket.emit("game - picked a word", word);
+  }
+})
 
-      if (socket.id == data.currentDrawer.socketId) {
-        canvas.addEventListener("mousedown", startDrawing);
-      }
-      socket.emit("game - round start")
-    })
+socket.on("game - round start", async data => {
+  // console.log("round start", data, socket.id)
+  await game.roundStartCounter()
 
-  }, 0)
+  if (socket.id == data.socketId) {
+    canvas.addEventListener("mousedown", startDrawing);
+
+    socket.emit("game - round start")
+  }
 })
 
 socket.on("game - round timer", data => {
   game.roundTimer(data)
 })
 
-
-
-
 socket.on("game - round end", data => {
-  console.log(data)
-  // game.roundEnd(data)
+  if (socket.id == data.drawer.socketId) {
+    console.log("round end", data.drawer.socketId, socket.id)
+    socket.emit("game - new round")
 
-
+    canvas.removeEventListener("mousedown", startDrawing)
+  }
 })
+
+
 
 // ++++++++++++++++++ //
 // + Message Events + //
 // ++++++++++++++++++ //
 
 socket.on("message - render", data => game.renderMessage(data))
-
-socket.on("message - clear", () => game.chat.innerHTML = "");
 
 // +++++++++++++++++ //
 // + Canvas Events + //

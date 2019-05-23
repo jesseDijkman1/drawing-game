@@ -41,8 +41,15 @@ export default class {
     }
   }
 
-  start(isDrawer) {
+  reset() {
+    const cWidth = this.canvas.getAttribute("width")
+    const cHeight = this.canvas.getAttribute("height")
+
+    this.ctx.clearRect(0, 0, cWidth, cHeight);
+
+    this.chat.innerHTML = "";
   }
+
 
   async updateGameStartIndicator(remove = undefined) {
       const template = `
@@ -140,14 +147,6 @@ export default class {
     socket.emit("canvas - save/broadcast", drawing, this.drawingsAmt)
   }
 
-  clearCanvas() {
-    socket.emit("canvas - clear all")
-  }
-
-  clearChat() {
-    socket.emit("message - clear all")
-  }
-
   async pickWord(words) {
     const template = `
     <section class="words-menu">
@@ -222,11 +221,6 @@ export default class {
     const timerEl = this.canvContainer.querySelector("#timer")
     timerEl.style.width = `${100 - data.percentage}%`
   }
-
-  roundEnd(data) {
-    console.log(data)
-  }
-
 
 
   async gamePopUp(content, replace = undefined) {

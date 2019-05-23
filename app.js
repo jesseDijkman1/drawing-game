@@ -27,6 +27,7 @@ const port = process.env.PORT || 5000;
 
 // let drawingsMemory = [];
 let messagesMemmory = [];
+
 let game = undefined;
 
 const minimumPlayers = 2;
@@ -85,26 +86,29 @@ let _allNouns;
 class Game {
   constructor(players) {
     this.players = players;
+    this.allIds = Object.keys(players)
     this.drawings = [];
-    this.allIds = undefined
     this.drawer = undefined;
     this.correctWord;
   }
 
-  startGame() {
-    this.allIds = Object.keys(this.players);
-    this.drawer = this.newDrawer();
-  }
+  // startGame() {
+  //   this.drawer = this.newDrawer();
+  // }
 
   endRound(winner = "no one") {
     return new Promise((resolve, reject) => {
       resolve({
         drawer: this.drawer,
         winner: winner,
-        correctWord: this.correctWord
+        correctWord: this.correctWord,
       })
     })
   }
+
+  // newRound() {
+  //   this.drawer = this.newDrawer();
+  // }
 
   randomWords() {
     const collection = [];
@@ -119,17 +123,24 @@ class Game {
   }
 
   newDrawer() {
-    if (!this.allIds.length) {
-      this.allIds = Object.keys(this.players);
-    }
+    return new Promise((resolve, reject) => {
+      if (!this.allIds.length) {
+        this.allIds = Object.keys(this.players);
+      }
 
-    return this.players[this.allIds.shift()]
+      const n = this.players[this.allIds.shift()]
+      resolve(n)
+    })
   }
 
   checkGuess(val) {
     const rx = new RegExp(this.correctWord);
     return new Promise((resolve, reject) => {
-      resolve(rx.test(val))
+      if (!this.correctWord) {
+        resolve(false)
+      } else {
+        resolve(rx.test(val))
+      }
     })
   }
 }
@@ -157,7 +168,6 @@ app.use(session({
 ///////////////
 //  Routing  //
 ///////////////
-
 
 app.get("/", (req, res) => {
   if (req.session.id in allSessions) {
@@ -214,10 +224,9 @@ io.on("connection", async socket => {
       if (onlineSesssionsAmt() >= minimumPlayers) {
         game = new Game(allSessions);
         game.nouns = await allNouns()
-        game.startGame()
+        game.drawer = await game.newDrawer()
 
-
-        io.emit("game - start", {
+        io.emit("game - new round", {
           currentDrawer: game.drawer,
           words: game.randomWords()
         })
@@ -225,42 +234,44 @@ io.on("connection", async socket => {
     }
 
     // Game Functions
+    socket.on("game - new round", async () => {
+      game.drawer = await game.newDrawer()
+
+      messagesMemmory = []
+      game.drawings = []
+
+      io.emit("game - new round", {
+        currentDrawer: game.drawer,
+        words: game.randomWords()
+      })
+    })
+
     socket.on("game - picked a word", word => {
       game.correctWord = word;
 
-      io.emit("game - round start")
+      io.emit("game - round start", game.drawer)
     })
 
     socket.on("game - round start", () => {
       let counter = 0;
 
-      const timer = setInterval(async () => {
+      game.timer = setInterval(async () => {
         if (counter >= ROUND_LENGTH) {
-          clearInterval(timer)
-          console.log("timer_1 ender")
+          clearInterval(game.timer)
           counter = 0;
 
           const roundData = await game.endRound();
 
-          socket.emit("game - round end", roundData)
-
-          // const timer_2 = setInterval(() => {
-          //   if (counter >= 5000) {
-          //     clearInterval(timer_2)
-          //   } else {
-          //     counter += 1000;
-          //     socket.emit("game - round restart counter", 5000 - counter)
-          //   }
-          //   console.log("")
-          // }, 1000)
-
+          io.emit("game - round end", roundData)
         } else {
           counter++
-          socket.emit("game - round timer", {time: counter, percentage: (counter/ROUND_LENGTH) * 100})
+
+          io.emit("game - round timer", {
+            time: counter,
+            percentage: (counter/ROUND_LENGTH) * 100
+          })
         }
       }, 1)
-
-
     })
 
     socket.emit("player - joined/update", {drawings: !game ? [] : game.drawings, messages: messagesMemmory})
@@ -268,7 +279,6 @@ io.on("connection", async socket => {
     socket.broadcast.emit("player - joined", socket.id)
 
     socket.on("canvas - save/broadcast", (drawing, id) => {
-      // drawingsMemory[id] = drawing;
       game.drawings[id] = drawing;
 
       socket.broadcast.emit("canvas - render", drawing)
@@ -283,8 +293,11 @@ io.on("connection", async socket => {
 
       if (game) {
         const correct = await game.checkGuess(val)
+        console.log(correct)
 
         if (correct) {
+          clearInterval(game.timer)
+
           // End the round and return data about winner, drawer
           const roundData = await game.endRound(allSessions[sessionId]);
 
@@ -297,12 +310,6 @@ io.on("connection", async socket => {
       game.drawings = [];
 
       io.emit("canvas - clear")
-    })
-
-    socket.on("message - clear all", () => {
-      messagesMemmory = [];
-
-      io.emit("message - clear")
     })
 
     socket.on("disconnect", () => {
