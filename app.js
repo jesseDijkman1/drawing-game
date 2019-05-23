@@ -1,5 +1,11 @@
 "use strict";
 
+/////////////////
+//  Constants  //
+/////////////////
+
+const ROUND_LENGTH = 5000;
+
 ///////////////
 //  Modules  //
 ///////////////
@@ -76,27 +82,6 @@ class Message {
 
 let _allNouns;
 
-class Timer {
-  constructor(start, end, step) {
-    this.start = start;
-    this.end = end;
-    this.step = step;
-
-  }
-
-  run(cb) {
-    const timer = setInterval(() => {
-      if (this.start >= this.end) {
-        clearInterval(timer)
-
-        return cb()
-      } else {
-        this.start += this.step;
-      }
-    }, this.step)
-  }
-}
-
 class Game {
   constructor(players) {
     this.players = players;
@@ -104,12 +89,24 @@ class Game {
     this.allIds = undefined
     this.drawer = undefined;
     this.correctWord;
+    this.timer;
   }
 
   startGame() {
     this.allIds = Object.keys(this.players);
     this.drawer = this.newDrawer();
+  }
 
+  beginRound(max, cb) {
+    let counter = 0;
+    this.timer = setInterval(() => {
+      if (counter >= max) {
+        clearInterval(this.timer)
+      } else {
+        counter++
+        return cb(counter)
+      }
+    }, 1)
   }
 
   endRound(winner) {
@@ -243,6 +240,10 @@ io.on("connection", async socket => {
     // Game Functions
     socket.on("game - picked a word", word => {
       game.correctWord = word;
+
+      game.beginRound(ROUND_LENGTH, time => {
+        io.emit("game - round timer", {time: time, percentage: (time/ROUND_LENGTH) * 100})
+      })
     })
 
 

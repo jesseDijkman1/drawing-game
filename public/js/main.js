@@ -147,8 +147,8 @@ socket.on("game - start", data => {
   }, 0)
 })
 
-socket.on("game - update timer", percentage => {
-  game.canvContainer.querySelector("#timer").style.width = `${percentage}%`
+socket.on("game - round timer", data => {
+  game.roundTimer(data)
 })
 
 socket.on("game - round end", data => game.roundEnd(data))
