@@ -20,7 +20,7 @@ require("dotenv").config()
 //  Constants  //
 /////////////////
 
-const ROUND_LENGTH = 2000;
+const ROUND_LENGTH = 20000;
 const API_PARAMS = {
   "user-id": process.env.USER_ID,
   "api-key": process.env.API_KEY,
@@ -100,7 +100,6 @@ class Game {
   }
 
   endRound(winner = {name: "no one", score: "0", socketId: undefined}) {
-
     if (!winner) {
       this.drawer.score--
     } else {
@@ -295,7 +294,6 @@ io.on("connection", async socket => {
 
     socket.on("message - create", async val => {
       const msg = new Message(sessionId, val)
-
       msg.msg = await profanityFilter(msg.msg)
 
       messagesMemmory.push(msg);
@@ -303,6 +301,7 @@ io.on("connection", async socket => {
       io.emit("message - render", msg)
 
       if (game) {
+
         const correct = await game.checkGuess(val)
 
         if (correct) {
@@ -326,10 +325,8 @@ io.on("connection", async socket => {
       allSessions[sessionId].socketId = undefined;
 
       if (onlineSesssionsAmt() < minimumPlayers) {
-          game = undefined;
-          messagesMemmory = [];
+        game = undefined
       }
-
 
       io.emit("player - update all", allSessions)
     })
@@ -369,14 +366,14 @@ function allNouns() {
 }
 
 function profanityFilter(string) {
-  const params = {...API_PARAMS, "content": string}
+  const params = {...API_PARAMS, content: string}
 
   return new Promise((resolve, reject) => {
-    request.post("https://neutrinoapi.com/bad-word-filter", {form: params}, (err, res, body) => {
+    request.post("https://neutrinoapi.com/bad-word-filter?", {form: params}, (err, res, body) => {
       if (!err && res.statusCode == 200) {
         resolve(JSON.parse(body)["censored-content"]);
       } else {
-        reject("")
+        resolve(string)
       }
     });
   })
