@@ -296,7 +296,7 @@ io.on("connection", async socket => {
     socket.on("message - create", async val => {
       const msg = new Message(sessionId, val)
 
-      // msg.msg = await profanityFilter(msg.msg)
+      msg.msg = await profanityFilter(msg.msg)
 
       messagesMemmory.push(msg);
 
