@@ -21,6 +21,7 @@ For this course we're going to make a real-time-application, with the use of web
   - [Week 2](#week-2)
   - [Week 3](#week-3)
   - [Resits](#resits)
+- [Code](#code)
 - [Sources](#sources)
 - [License](#license)
 
