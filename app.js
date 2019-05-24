@@ -20,7 +20,7 @@ require("dotenv").config()
 //  Constants  //
 /////////////////
 
-const ROUND_LENGTH = 20000;
+const ROUND_LENGTH = 2000;
 const API_PARAMS = {
   "user-id": process.env.USER_ID,
   "api-key": process.env.API_KEY,
@@ -99,7 +99,7 @@ class Game {
     this.correctWord;
   }
 
-  endRound(winner = false) {
+  endRound(winner = {name: "no one", score: "0", socketId: undefined}) {
 
     if (!winner) {
       this.drawer.score--
@@ -228,7 +228,7 @@ io.on("connection", async socket => {
 
     io.emit("player - update all", allSessions)
 
-    if (!game) {
+    // if (!game) {
       if (onlineSesssionsAmt() >= minimumPlayers) {
         game = new Game(allSessions);
         game.nouns = await allNouns()
@@ -239,7 +239,7 @@ io.on("connection", async socket => {
           words: game.randomWords()
         })
       }
-    }
+    // }
 
     // Game Functions
     socket.on("game - new round", async () => {
