@@ -21,7 +21,6 @@ For this course we're going to make a real-time-application, with the use of web
   - [Week 2](#week-2)
   - [Week 3](#week-3)
   - [Resits](#resits)
-- [Code](#code)
 - [Sources](#sources)
 - [License](#license)
 
@@ -39,7 +38,14 @@ For this course we're going to make a real-time-application, with the use of web
 ---
 
 ## Concept
-During my resits I started with another drawing app, with the idea to use a random-image API. The idea was that you would try to mimic the image with a drawing, and the spectators could choose from 4 images; with the one you're drawing. If someone guessed the correct image you (the drawer) and the winner would get points. Fairly simple, but rather stupid I.M.O. So eventually I found a list with nouns and implemented a different API; [Bad Words Filter](https://www.neutrinoapi.com/api/bad-word-filter/). With this API I'm filtering the chat for cursewords.
+A drawing-game where users get turns to draw a random noun. The spectators have to guess the word, when guessed the drawer and spectator get points. When no one guesses it, the drawer gets negative points. The points are saved on the server at the matching session id.
+
+### Features
+- **Pen Options**
+  - Size
+  - Color
+- **Chat**
+- **Scoreboard**
 
 ---
 
@@ -81,3 +87,51 @@ In this week I switched back to my drawing app, because my search for an API rea
 During my resits I started on a new drawing app. But I couldn't help and use this time learn more about javascript `classes`; like `extends` `get` `set` `super`. I also tried to keep my code as clean as possible. This all led to me wasting my time.
 
 --- 
+
+## Code
+**Retrieving the session id**
+```js
+function cookieSession(socket) {
+  return new Promise((resolve, reject) => {
+    const rough = cookie.parse(socket.request.headers.cookie)["connect.sid"],
+          rx = /(?<=s:).+?(?=\.)/;
+
+     resolve(rx.exec(rough)[0])
+  })
+}
+```
+> Get the session id from the socket object
+
+**Rendering the drawings**
+```js
+renderDrawing(drawing) {
+      this.ctx.lineJoin = "round";
+      this.ctx.strokeStyle = drawing.penColor;
+      this.ctx.lineWidth = drawing.penSize;
+
+      drawing.points.forEach((p, i, a) => {
+        this.ctx.beginPath();
+
+        if (i == 0) {
+          this.ctx.moveTo(this.x, this.y)
+        } else {
+          this.ctx.moveTo(a[i - 1].x, a[i - 1].y)
+        }
+
+        this.ctx.lineTo(p.x, p.y)
+        this.ctx.closePath()
+        this.ctx.stroke()
+      })
+  }
+```
+> Create lines with the coordinates
+
+---
+
+## Sources
+- [API](https://www.neutrinoapi.com/api/bad-word-filter/)
+- [Nouns List](http://www.desiquintans.com/articles/noungenerator.php)
+---
+
+## License
+MIT © [Jesse Dijkman](https://github.com/jesseDijkman1)
