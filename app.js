@@ -287,6 +287,7 @@ io.on("connection", async socket => {
     socket.broadcast.emit("player - joined", socket.id)
 
     socket.on("canvas - save/broadcast", (drawing, id) => {
+
       game.drawings[id] = drawing;
 
       socket.broadcast.emit("canvas - render", drawing)
@@ -294,6 +295,8 @@ io.on("connection", async socket => {
 
     socket.on("message - create", async val => {
       const msg = new Message(sessionId, val)
+
+      console.log(msg)
 
       msg.msg = await profanityFilter(msg.msg)
 
