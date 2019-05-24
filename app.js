@@ -370,7 +370,7 @@ function profanityFilter(string) {
       if (!err && res.statusCode == 200) {
         resolve(JSON.parse(body)["censored-content"]);
       } else {
-        resolve("yo mommma")
+        reject("")
       }
     });
   })
