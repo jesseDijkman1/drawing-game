@@ -70,21 +70,20 @@ A drawing-game where users get turns to draw a random noun. The spectators have 
   - All messages are cleared
   - All drawings are cleared
   
-
 ---
 
 ## Process
 ### Week 1
-In the first week (first day) I created a simple drawing app with a chat. Which was waaay too easy, so I wanted to make another app. A platform shooter.
+In the first week (first day) I created a simple [drawing app with a chat](https://github.com/jesseDijkman1/real-time-web-1819/tree/master/chatapp). Which was waaay too easy, so I wanted to make another app. A [platform shooter](https://github.com/jesseDijkman1/platform-shooter).
 
 ### Week 2
-During this week I worked on the platform shooter, I created the movement and shooting mechanics. I just had a lot of trouble with coming up with an API to use.
+During this week I worked on the [platform shooter](https://github.com/jesseDijkman1/platform-shooter)., I created the movement and shooting mechanics. I just had a lot of trouble with coming up with an API to use.
 
 ### Week 3
 In this week I switched back to my drawing app, because my search for an API really slowed me down. But in this week I didn't find an API either and eventually gave up.
 
 ### Resits
-During my resits I started on a new drawing app. But I couldn't help and use this time learn more about javascript `classes`; like `extends` `get` `set` `super`. I also tried to keep my code as clean as possible. This all led to me wasting my time.
+During my resits I started on a new drawing app. But I couldn't help and use this time learn more about javascript `classes`; `extends`, `get`, `set`, `super`. I also tried to keep my code as clean as possible and splitting it into modules (on the frontend). This all led to me wasting my time, but learning a lot.
 
 --- 
 
