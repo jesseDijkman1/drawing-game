@@ -141,7 +141,7 @@ socket.on("game - new round", async data => {
 })
 
 socket.on("game - round start", async data => {
-  game.reset()
+  // game.reset()
 
   await game.roundStartCounter()
 
@@ -156,9 +156,13 @@ socket.on("game - round timer", data => {
   game.roundTimer(data)
 })
 
-socket.on("game - round end", data => {
+socket.on("game - round end", async data => {
+  await game.roundWinner(data)
+  console.log("next step")
   game.allPlayers = data.users;
   game.updateScoreboard()
+
+
 
   if (socket.id == data.drawer.socketId) {
     socket.emit("game - new round")

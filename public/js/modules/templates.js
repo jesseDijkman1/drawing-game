@@ -6,8 +6,8 @@ export function nextDrawer(name) {
   return `<h2>^The next drawer is: ${name}^</h2>`
 }
 
-export function roundWinner(name) {
-  return `<h2>${name} guessed the word</h2>`
+export function roundWinner(name, word) {
+  return `<h2>^${name} guessed the word: ${word}^</h2>`
 }
 
 export function counter(time) {

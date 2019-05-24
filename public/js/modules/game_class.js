@@ -198,7 +198,6 @@ export default class {
 
         this.canvContainer.appendChild(pickedWord)
         resolve(randomWord)
-        // timer.timeout(() => resolve(randomWord))
       })
     })
   }
@@ -228,6 +227,20 @@ export default class {
   roundTimer(data) {
     const timerEl = this.canvContainer.querySelector("#timer")
     timerEl.style.width = `${100 - data.percentage}%`
+  }
+
+  roundWinner(data) {
+    const timer = new Timer(0, 3000, 1000, true);
+    const winner = new Templater(templates.roundWinner(data.winner.name, data.correctWord)).parse();
+
+    return new Promise((resolve, reject) => {
+      this.gamePopUp(winner)
+
+      timer.timeout(() => {
+        this.canvContainer.querySelector(".pop-up").remove()
+        resolve()
+      })
+    })
   }
 
 

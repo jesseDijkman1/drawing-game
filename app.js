@@ -104,7 +104,7 @@ class Game {
     if (!winner) {
       this.drawer.score--
     } else {
-      this.drawer.score += 3;
+      this.drawer.score += 2;
       winner.score += 3;
     }
 
