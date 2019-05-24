@@ -366,11 +366,11 @@ function profanityFilter(string) {
   const params = {...API_PARAMS, "content": string}
 
   return new Promise((resolve, reject) => {
-    request.post("https://neutrinoapi.com/bad-word-filter?", {form: params}, (err, res, body) => {
+    request.post("https://neutrinoapi.com/bad-word-filter", {form: params}, (err, res, body) => {
       if (!err && res.statusCode == 200) {
         resolve(JSON.parse(body)["censored-content"]);
       } else {
-        reject("")
+        reject(string)
       }
     });
   })
